@@ -26,7 +26,6 @@ for subfolder in subfolders:
 print dict
 
 def checkFold(name):
-    fold = facescrub_root
     if not os.path.exists(name):
         os.mkdir(name)
 

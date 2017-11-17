@@ -30,7 +30,6 @@ def splits_resamples(facescrub_root):
     print dict
 
     def checkFold(name):
-        fold = facescrub_root
         if not os.path.exists(name):
             os.mkdir(name)
 
@@ -116,7 +115,9 @@ def batch(folder):
     test_ratio = 0.67
     import multiprocessing
     #folder = './imagenet/tiny-imagenet-200/test/images/'
-
+    with open('full-synset.txt','r') as file:
+        synsets = [l.rstrip() for l in file]
+    # print synsets
     def handleFolder(GUPid, tasks):
         #synset = [l.strip() for l in open(args.synset).readlines()]
         prefix = "full-resnet-152"
@@ -127,7 +128,7 @@ def batch(folder):
         fea_symbol = internals["fc1_output"]
         feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GUPid), symbol=fea_symbol, numpy_batch_size=1,
                                                 arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
-
+        
         #subfolders = [ fold for fold in os.listdir(folder)]
         k = 0
         for subfolder in tasks:
@@ -149,7 +150,7 @@ def batch(folder):
                     img = np.swapaxes(img, 1, 2)  # change to (c, h,w) order
                     img = img[np.newaxis, :]  # extend to (n, c, h, w)
                     f = feature_extractor.predict(img)
-                    # print f.shape
+                    print 'label: %s #### %d' % (synsets[f[0].argmax()], f[0].argmax())
                     feature_array.append((f[0], subfolder, filename))
                 print 'End : %s' % filename
             random.shuffle(feature_array)
