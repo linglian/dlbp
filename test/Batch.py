@@ -1,7 +1,6 @@
 
 # imgPath: facescrub_root/examples/
 
-
 def splits_resamples(facescrub_root):
     #import sklearn
     import numpy as np
@@ -112,7 +111,7 @@ def batch(folder):
     import os
     import random
     # folder = '/home/lol/dl/image/examples'
-    test_ratio = 0.67
+    test_ratio = 0.98
     import multiprocessing
     #folder = './imagenet/tiny-imagenet-200/test/images/'
     with open('full-synset.txt','r') as file:
@@ -195,7 +194,7 @@ def batch(folder):
 
 def run(path):
     print 'Start SplitsResamples'
-    # splits_resamples(path)
+    splits_resamples(path)
     print 'End SplitsResamples'
     print 'Start Batch'
     batch(path + '/examples')

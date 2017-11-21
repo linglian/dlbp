@@ -10,26 +10,31 @@ npy_paths = [os.path.join(root, npy) for npy in os.listdir(
 print npy_paths
 
 i = 0
-
-def checkFold(name):
+def checkFile(name):
     if os.path.exists(name):
         os.remove(name)
     os.mknod(name)
 
-checkFold(root + '/test.lst')
+def checkFold(name):
+    if not os.path.exists(name):
+        os.mkdir(name)
 
-out = open(root + '/test.lst', 'w')
+checkFold(root + '/../lst')
 
-checkFold(root + '/train.lst')
+checkFile(root + '/../lst/test.lst')
 
-out2 = open(root + '/train.lst', 'w')
+out = open(root + '/../lst/test.lst', 'w')
+
+checkFile(root + '/../lst/train.lst')
+
+out2 = open(root + '/../lst/train.lst', 'w')
 
 for npy_path in npy_paths:
     test = np.load(os.path.join(npy_path, 'test.npy'))
     train = np.load(os.path.join(npy_path, 'test.npy'))
     for (te, tr) in zip(test, train):
-        out.write('%d\t%d\t%s\n' % (i, te[0].argmax(), os.path.join(npy_path, te[2])))
-        out2.write('%d\t%d\t%s\n' % (i, tr[0].argmax(), os.path.join(npy_path, tr[2])))
+        out.write('%d\t%d\t%s\n' % (i, te[0].argmax(), os.path.join(te[1], te[2])))
+        out2.write('%d\t%d\t%s\n' % (i, tr[0].argmax(), os.path.join(tr[1], tr[2])))
         i += 1
 
 out.close()
