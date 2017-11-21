@@ -87,7 +87,7 @@ def splits_resamples(facescrub_root):
 
     for subfolder in subfolders:
         imgsfiles = [os.path.join(fold, subfolder, img)
-                     for img in os.listdir(os.path.join(fold, subfolder))]
+                     for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
         print 'Start Directory: %s' % subfolder
         for imgfile in imgsfiles:
             checkFold(fold + '/examples/' + subfolder)
@@ -183,7 +183,7 @@ def batch(folder, loadfolder, test_ratio = 0.02):
             print 'Start: %s' % workspace_folder
             for filename in os.listdir(workspace_folder):
                 # print 'Start : %s' % filename
-                if '.jpg' in filename or '.JPEG' in filename:
+                if '.jpg' in filename or '.JPG' in filename:
                     i += 1
                     f = getFeatures(os.path.join(workspace_folder, filename), mod)
                     feature_array.append((f[0], subfolder, filename))
@@ -227,24 +227,22 @@ def batch(folder, loadfolder, test_ratio = 0.02):
 
 if __name__=='__main__':
     
-    filePath = '/home/lol/dl/dlbp/image'
+    filePath = '/home/lol/dl/Image'
 
     import time
 
-    '''
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sf:')
-    for op, value in opts:
-        if op == '-f':
-            filePath = value
-            sp = splits_resamples(filePath)
-            batch(sp, filePath)
-            removeDir(sp)
-        elif op == '-sf':
-            filePath = value
-            subfolders = [folder for folder in os.listdir(
-                filePath) if os.path.isdir(os.path.join(filePath, folder))]
-            print subfolders
-    '''
+    # opts, args = getopt.getopt(sys.argv[1:], 'f:sf:')
+    # for op, value in opts:
+    #     if op == '-f':
+    #         filePath = value
+    #         sp = splits_resamples(filePath)
+    #         batch(sp, filePath)
+    #         removeDir(sp)
+    #     elif op == '-sf':
+    #         filePath = value
+    #         subfolders = [folder for folder in os.listdir(
+    #             filePath) if os.path.isdir(os.path.join(filePath, folder))]
+    #         print subfolders
 
     subfolders = [folder for folder in os.listdir(
         filePath) if os.path.isdir(os.path.join(filePath, folder))]

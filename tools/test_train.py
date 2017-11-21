@@ -4,7 +4,7 @@ import os
 import math
 import multiprocessing
 import sys
-
+import cv2
 import logging
 
 logging.basicConfig(level=logging.DEBUG,
@@ -20,15 +20,12 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
 def EuclideanDistance(form, to):
-    sum = 0
-    for (i, j) in zip(form, to):
-        sum += (i - j) * (i - j)
-    return math.sqrt(sum)
+    return cv2.norm(form, to)
 
 def run():
     import time
     t = time.time()
-    filePath = '/home/lol/dl/dlbp/image'
+    filePath = '/home/lol/dl/Image'
     print "Start load npy"
     test = np.load(os.path.join(filePath, 'test.npy'))
     train = np.load(os.path.join(filePath, 'train.npy'))
