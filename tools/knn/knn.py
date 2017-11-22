@@ -5,32 +5,32 @@ import time
 import cv2
 
 def load_all_img(path, test_ratio=0.02):
+    import time
     imgArray = []
     
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
-    # print subfolders
-
+    print subfolders
 
     for file in subfolders:
-        t1 = time.time()
         filepath = os.path.join(path, file)
         subfolders2 = [folder for folder in os.listdir(
             filepath) if os.path.isdir(os.path.join(filepath, folder))]
-        # print subfolders2
+        print subfolders2
         for file2 in subfolders2:
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             subfolders3 = [folder for folder in os.listdir(
                 filepath2) if not os.path.isdir(os.path.join(filepath2, folder)) and os.path.join(filepath2, folder).endswith('.JPG')]
-            #print subfolders3
+            print subfolders3
             for img in subfolders3:
                 filepath3 = os.path.join(filepath2, img)
-                #print filepath3
+                print filepath3
                 m = cv2.imread(filepath3, 1)
                 im = cv2.cvtColor(m, cv2.COLOR_BGR2RGB)
-                im = cv2.resize(im, (224, 224))  # resize to 224*224 to fit model
+                im = cv2.resize(im, (224, 224))
                 imgArray.append([im, file2])
+            print 'SpeedTime: %f' % (t1 - time.time())
     return imgArray[:int(len(imgArray) * test_ratio)], imgArray[int(len(imgArray) * (test_ratio)):]
 
 def getDistances(form, to):
@@ -56,6 +56,7 @@ if __name__=='__main__':
     now = 0
     print 'test: %d  train: %d' % (testNum, trainNum)
     for i in test:
+        t1 = time.time()
         minD = [999, 'None']
         tempI = np.ravel(i[0])
         for j in train:
@@ -69,6 +70,6 @@ if __name__=='__main__':
         else:
             bad += 1
         now += 1
-        print 'right: %d bad: %d now: %d/%d' % (right, bad, now, testNum)
+        print 'right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (t1 - time.time()))
     #test = test.reshape(test.shape[0], 224 * 224 * 3)
     #print test
