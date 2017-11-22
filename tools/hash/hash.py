@@ -43,6 +43,7 @@ def load_all_beOne(path, test_ratio=0.02):
         for file2 in subfolders2:
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
+            print 'Load Knn.npy: %s' % (os.path.join(filepath2, 'knn.npy'))
             imgArray = np.load(os.path.join(filepath2, 'knn.npy'))
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' % os.path.join(filepath2, 'knn.npy'))
@@ -64,34 +65,46 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     path = '/home/lol/dl/Image'
-    test, train = load_all_beOne(path, test_ratio=0.32)
-    testNum = len(test)
-    trainNum = len(train)
-    right = 0
-    bad = 0
-    now = 0
-    print 'Start Test (Test: %d Train: %d)' % (len(test), len(train))
-    m_time = time.time()
-    for i in test:
-        t1 = time.time()
-        minD = []
-        tempI = np.ravel(i[0])
-        for j in train:
-            tempJ = np.ravel(j[0])
-            dist = getDistances(tempI, tempJ)
-            minD.append([dist, j[1]])
-        label = [x[1] for x in minD]
-        label = np.array(label)
-        tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
-        tempArray2 = label[tempArray1]
-        cu = Counter(tempArray2)
-        la = cu.most_common(1)[0][0]
-        if la == i[1]:
-            right += 1
-        else:
-            bad += 1
-            logging.warn('bad: %s != %s %s' % (i[1], la, cu.most_common(5)))
-        now += 1
-        logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
-    
-    print 'End Test Speed Time: %f s' % (time.time() - m_time)
+
+    opts, args = getopt.getopt(sys.argv[1:], 'f:lt')
+
+    for op, value in opts:
+        if op == '-f':
+            path = value
+        elif op == '-l':
+            test, train = load_all_beOne(path)
+            np.save(os.path.join(path, 'hash_test.npy'), test)
+            np.save(os.path.join(path, 'hash_train.npy'), train)
+        elif op == '-t':
+            test = np.load(os.path.join(path, 'hash_test.npy'))
+            train = np.load(os.path.join(path, 'hash_train.npy'))
+            testNum = len(test)
+            trainNum = len(train)
+            right = 0
+            bad = 0
+            now = 0
+            print 'Start Test (Test: %d Train: %d)' % (len(test), len(train))
+            m_time = time.time()
+            for i in test:
+                t1 = time.time()
+                minD = []
+                tempI = np.ravel(i[0])
+                for j in train:
+                    tempJ = np.ravel(j[0])
+                    dist = getDistances(tempI, tempJ)
+                    minD.append([dist, j[1]])
+                label = [x[1] for x in minD]
+                label = np.array(label)
+                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
+                tempArray2 = label[tempArray1]
+                cu = Counter(tempArray2)
+                la = cu.most_common(1)[0][0]
+                if la == i[1]:
+                    right += 1
+                else:
+                    bad += 1
+                    logging.warn('bad: %s != %s %s' % (i[1], la, cu.most_common(5)))
+                now += 1
+                logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+            
+            print 'End Test Speed Time: %f s' % (time.time() - m_time)
