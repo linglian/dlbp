@@ -1,33 +1,87 @@
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 1 bad: 0 now: 1/19 Time: 0.000776 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 6452 != 4997 [('4997', 2), ('4268', 1), ('5442', 1), ('4411', 1), ('6452', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 1 bad: 1 now: 2/19 Time: 0.000843 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 1469 != 1448 [('1448', 2), ('6418', 1), ('4268', 1), ('5442', 1), ('5446', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 1 bad: 2 now: 3/19 Time: 0.000674 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 2 bad: 2 now: 4/19 Time: 0.000577 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 6452 != 6418 [('6418', 1), ('4268', 1), ('5442', 1), ('5446', 1), ('4411', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 2 bad: 3 now: 5/19 Time: 0.000724 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 5446 != 6452 [('6452', 2), ('1448', 2), ('6418', 1), ('4268', 1), ('5446', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 2 bad: 4 now: 6/19 Time: 0.000651 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4997 != 6418 [('6418', 2), ('5446', 2), ('5442', 1), ('6452', 1), ('1469', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 2 bad: 5 now: 7/19 Time: 0.000648 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 1123 != 4268 [('4268', 3), ('4411', 2), ('6418', 1), ('4997', 1), ('6452', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 2 bad: 6 now: 8/19 Time: 0.000632 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 3 bad: 6 now: 9/19 Time: 0.000561 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4976 != 1465 [('1465', 2), ('1448', 2), ('6418', 1), ('5442', 1), ('4411', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 3 bad: 7 now: 10/19 Time: 0.000670 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 7 now: 11/19 Time: 0.000609 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 5442 != 6418 [('6418', 2), ('1465', 2), ('4268', 1), ('5442', 1), ('1123', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 8 now: 12/19 Time: 0.000721 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 1469 != 6418 [('6418', 3), ('4223', 2), ('4268', 1), ('5446', 1), ('6452', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 9 now: 13/19 Time: 0.000753 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4268 != 1448 [('1448', 2), ('6418', 1), ('4268', 1), ('5442', 1), ('4411', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 10 now: 14/19 Time: 0.000687 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4411 != 6452 [('6452', 2), ('1469', 2), ('4223', 2), ('6418', 1), ('4268', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 11 now: 15/19 Time: 0.000699 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 1465 != 6452 [('6452', 4), ('5442', 1), ('5446', 1), ('4411', 1), ('4997', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 12 now: 16/19 Time: 0.000750 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4411 != 6452 [('6452', 3), ('1465', 2), ('1469', 2), ('6418', 2), ('4976', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 4 bad: 13 now: 17/19 Time: 0.000708 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 5 bad: 13 now: 18/19 Time: 0.000673 s
-Thu, 23 Nov 2017 02:08:57 hash.py[line:93] WARNING bad: 4411 != 4268 [('4268', 4), ('1465', 2), ('4411', 1), ('4997', 1), ('6452', 1)]
-Thu, 23 Nov 2017 02:08:57 hash.py[line:95] INFO right: 5 bad: 14 now: 19/19 Time: 0.000946 s
+Thu, 23 Nov 2017 03:48:01 knn.py[line:274] INFO test: 44  train: 2176
+Thu, 23 Nov 2017 03:48:01 knn.py[line:293] WARNING bad: 5442 != 5446 [('5446', 6), ('6418', 3), ('4268', 1)]
+Thu, 23 Nov 2017 03:48:01 knn.py[line:295] INFO right: 0 bad: 1 now: 1/44 Time: 0.465939 s
+Thu, 23 Nov 2017 03:48:01 knn.py[line:293] WARNING bad: 5446 != 1448 [('1448', 5), ('4997', 3), ('1465', 2)]
+Thu, 23 Nov 2017 03:48:01 knn.py[line:295] INFO right: 0 bad: 2 now: 2/44 Time: 0.466538 s
+Thu, 23 Nov 2017 03:48:02 knn.py[line:293] WARNING bad: 6452 != 5446 [('5446', 4), ('4997', 2), ('4976', 2), ('1465', 1), ('4411', 1)]
+Thu, 23 Nov 2017 03:48:02 knn.py[line:295] INFO right: 0 bad: 3 now: 3/44 Time: 0.475039 s
+Thu, 23 Nov 2017 03:48:02 knn.py[line:293] WARNING bad: 6452 != 1448 [('1448', 5), ('5442', 1), ('1123', 1), ('6452', 1), ('1469', 1)]
+Thu, 23 Nov 2017 03:48:02 knn.py[line:295] INFO right: 0 bad: 4 now: 4/44 Time: 0.480171 s
+Thu, 23 Nov 2017 03:48:03 knn.py[line:293] WARNING bad: 1469 != 1123 [('1123', 5), ('1448', 4), ('6452', 1)]
+Thu, 23 Nov 2017 03:48:03 knn.py[line:295] INFO right: 0 bad: 5 now: 5/44 Time: 0.465395 s
+Thu, 23 Nov 2017 03:48:03 knn.py[line:293] WARNING bad: 4223 != 4997 [('4997', 6), ('1469', 4)]
+Thu, 23 Nov 2017 03:48:03 knn.py[line:295] INFO right: 0 bad: 6 now: 6/44 Time: 0.469630 s
+Thu, 23 Nov 2017 03:48:04 knn.py[line:293] WARNING bad: 5446 != 4976 [('4976', 8), ('1469', 2)]
+Thu, 23 Nov 2017 03:48:04 knn.py[line:295] INFO right: 0 bad: 7 now: 7/44 Time: 0.470786 s
+Thu, 23 Nov 2017 03:48:04 knn.py[line:293] WARNING bad: 5442 != 4997 [('4997', 6), ('1469', 3), ('4411', 1)]
+Thu, 23 Nov 2017 03:48:04 knn.py[line:295] INFO right: 0 bad: 8 now: 8/44 Time: 0.483006 s
+Thu, 23 Nov 2017 03:48:05 knn.py[line:293] WARNING bad: 4411 != 4997 [('4997', 9), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:05 knn.py[line:295] INFO right: 0 bad: 9 now: 9/44 Time: 0.480451 s
+Thu, 23 Nov 2017 03:48:05 knn.py[line:293] WARNING bad: 6452 != 6418 [('6418', 5), ('4997', 3), ('5446', 2)]
+Thu, 23 Nov 2017 03:48:05 knn.py[line:295] INFO right: 0 bad: 10 now: 10/44 Time: 0.478552 s
+Thu, 23 Nov 2017 03:48:06 knn.py[line:293] WARNING bad: 6418 != 4997 [('4997', 7), ('4411', 2), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:06 knn.py[line:295] INFO right: 0 bad: 11 now: 11/44 Time: 0.495507 s
+Thu, 23 Nov 2017 03:48:06 knn.py[line:293] WARNING bad: 4411 != 4997 [('4997', 6), ('1465', 1), ('4976', 1), ('5446', 1), ('1448', 1)]
+Thu, 23 Nov 2017 03:48:06 knn.py[line:295] INFO right: 0 bad: 12 now: 12/44 Time: 0.490845 s
+Thu, 23 Nov 2017 03:48:07 knn.py[line:295] INFO right: 1 bad: 12 now: 13/44 Time: 0.464450 s
+Thu, 23 Nov 2017 03:48:07 knn.py[line:293] WARNING bad: 1448 != 1469 [('1469', 5), ('5446', 4), ('6418', 1)]
+Thu, 23 Nov 2017 03:48:07 knn.py[line:295] INFO right: 1 bad: 13 now: 14/44 Time: 0.464566 s
+Thu, 23 Nov 2017 03:48:08 knn.py[line:293] WARNING bad: 1123 != 4997 [('4997', 3), ('5446', 2), ('1448', 2), ('4411', 1), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:08 knn.py[line:295] INFO right: 1 bad: 14 now: 15/44 Time: 0.467898 s
+Thu, 23 Nov 2017 03:48:08 knn.py[line:293] WARNING bad: 4411 != 4997 [('4997', 9), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:08 knn.py[line:295] INFO right: 1 bad: 15 now: 16/44 Time: 0.465090 s
+Thu, 23 Nov 2017 03:48:09 knn.py[line:293] WARNING bad: 1448 != 5446 [('5446', 8), ('6418', 2)]
+Thu, 23 Nov 2017 03:48:09 knn.py[line:295] INFO right: 1 bad: 16 now: 17/44 Time: 0.472350 s
+Thu, 23 Nov 2017 03:48:09 knn.py[line:293] WARNING bad: 6418 != 4976 [('4976', 9), ('1469', 1)]
+Thu, 23 Nov 2017 03:48:09 knn.py[line:295] INFO right: 1 bad: 17 now: 18/44 Time: 0.474524 s
+Thu, 23 Nov 2017 03:48:10 knn.py[line:293] WARNING bad: 4268 != 4997 [('4997', 9), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:10 knn.py[line:295] INFO right: 1 bad: 18 now: 19/44 Time: 0.478032 s
+Thu, 23 Nov 2017 03:48:10 knn.py[line:293] WARNING bad: 4268 != 1469 [('1469', 8), ('1465', 1), ('4997', 1)]
+Thu, 23 Nov 2017 03:48:10 knn.py[line:295] INFO right: 1 bad: 19 now: 20/44 Time: 0.488339 s
+Thu, 23 Nov 2017 03:48:11 knn.py[line:293] WARNING bad: 5442 != 5446 [('5446', 4), ('4411', 3), ('1465', 1), ('4268', 1), ('4997', 1)]
+Thu, 23 Nov 2017 03:48:11 knn.py[line:295] INFO right: 1 bad: 20 now: 21/44 Time: 0.485926 s
+Thu, 23 Nov 2017 03:48:11 knn.py[line:293] WARNING bad: 1123 != 5446 [('5446', 9), ('6418', 1)]
+Thu, 23 Nov 2017 03:48:11 knn.py[line:295] INFO right: 1 bad: 21 now: 22/44 Time: 0.508249 s
+Thu, 23 Nov 2017 03:48:12 knn.py[line:293] WARNING bad: 5446 != 1448 [('1448', 8), ('5446', 2)]
+Thu, 23 Nov 2017 03:48:12 knn.py[line:295] INFO right: 1 bad: 22 now: 23/44 Time: 0.473544 s
+Thu, 23 Nov 2017 03:48:12 knn.py[line:293] WARNING bad: 1469 != 4997 [('4997', 8), ('1465', 1), ('4976', 1)]
+Thu, 23 Nov 2017 03:48:12 knn.py[line:295] INFO right: 1 bad: 23 now: 24/44 Time: 0.468579 s
+Thu, 23 Nov 2017 03:48:12 knn.py[line:293] WARNING bad: 5442 != 4997 [('4997', 9), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:12 knn.py[line:295] INFO right: 1 bad: 24 now: 25/44 Time: 0.470414 s
+Thu, 23 Nov 2017 03:48:13 knn.py[line:293] WARNING bad: 5446 != 4976 [('4976', 4), ('5446', 2), ('6418', 1), ('5442', 1), ('1469', 1)]
+Thu, 23 Nov 2017 03:48:13 knn.py[line:295] INFO right: 1 bad: 25 now: 26/44 Time: 0.466018 s
+Thu, 23 Nov 2017 03:48:13 knn.py[line:293] WARNING bad: 1465 != 4997 [('4997', 8), ('6418', 2)]
+Thu, 23 Nov 2017 03:48:13 knn.py[line:295] INFO right: 1 bad: 26 now: 27/44 Time: 0.469923 s
+Thu, 23 Nov 2017 03:48:14 knn.py[line:293] WARNING bad: 1448 != 4997 [('4997', 5), ('6418', 3), ('5446', 2)]
+Thu, 23 Nov 2017 03:48:14 knn.py[line:295] INFO right: 1 bad: 27 now: 28/44 Time: 0.467039 s
+Thu, 23 Nov 2017 03:48:14 knn.py[line:293] WARNING bad: 4411 != 4997 [('4997', 8), ('1465', 1), ('1448', 1)]
+Thu, 23 Nov 2017 03:48:14 knn.py[line:295] INFO right: 1 bad: 28 now: 29/44 Time: 0.485137 s
+Thu, 23 Nov 2017 03:48:15 knn.py[line:293] WARNING bad: 1123 != 5446 [('5446', 8), ('6418', 2)]
+Thu, 23 Nov 2017 03:48:15 knn.py[line:295] INFO right: 1 bad: 29 now: 30/44 Time: 0.467912 s
+Thu, 23 Nov 2017 03:48:15 knn.py[line:293] WARNING bad: 6418 != 4997 [('4997', 5), ('1465', 2), ('4976', 2), ('1448', 1)]
+Thu, 23 Nov 2017 03:48:15 knn.py[line:295] INFO right: 1 bad: 30 now: 31/44 Time: 0.494816 s
+Thu, 23 Nov 2017 03:48:16 knn.py[line:293] WARNING bad: 1448 != 5442 [('5442', 9), ('5446', 1)]
+Thu, 23 Nov 2017 03:48:16 knn.py[line:295] INFO right: 1 bad: 31 now: 32/44 Time: 0.557388 s
+Thu, 23 Nov 2017 03:48:16 knn.py[line:293] WARNING bad: 1469 != 1448 [('1448', 4), ('1123', 3), ('6452', 2), ('4976', 1)]
+Thu, 23 Nov 2017 03:48:16 knn.py[line:295] INFO right: 1 bad: 32 now: 33/44 Time: 0.525190 s
+Thu, 23 Nov 2017 03:48:17 knn.py[line:293] WARNING bad: 5442 != 5446 [('5446', 3), ('4997', 3), ('5442', 1), ('4411', 1), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:17 knn.py[line:295] INFO right: 1 bad: 33 now: 34/44 Time: 0.480698 s
+Thu, 23 Nov 2017 03:48:17 knn.py[line:293] WARNING bad: 1448 != 5446 [('5446', 7), ('6418', 3)]
+Thu, 23 Nov 2017 03:48:17 knn.py[line:295] INFO right: 1 bad: 34 now: 35/44 Time: 0.503684 s
+Thu, 23 Nov 2017 03:48:18 knn.py[line:293] WARNING bad: 5442 != 4411 [('4411', 5), ('4997', 3), ('4976', 2)]
+Thu, 23 Nov 2017 03:48:18 knn.py[line:295] INFO right: 1 bad: 35 now: 36/44 Time: 0.480676 s
+Thu, 23 Nov 2017 03:48:18 knn.py[line:293] WARNING bad: 5442 != 6418 [('6418', 4), ('1465', 2), ('5446', 2), ('4268', 1), ('1448', 1)]
+Thu, 23 Nov 2017 03:48:18 knn.py[line:295] INFO right: 1 bad: 36 now: 37/44 Time: 0.475775 s
+Thu, 23 Nov 2017 03:48:19 knn.py[line:293] WARNING bad: 5442 != 4997 [('4997', 6), ('4976', 2), ('1465', 1), ('5446', 1)]
+Thu, 23 Nov 2017 03:48:19 knn.py[line:295] INFO right: 1 bad: 37 now: 38/44 Time: 0.485732 s
+Thu, 23 Nov 2017 03:48:19 knn.py[line:295] INFO right: 2 bad: 37 now: 39/44 Time: 0.469453 s
+Thu, 23 Nov 2017 03:48:20 knn.py[line:293] WARNING bad: 5446 != 1448 [('1448', 9), ('1465', 1)]
+Thu, 23 Nov 2017 03:48:20 knn.py[line:295] INFO right: 2 bad: 38 now: 40/44 Time: 0.468401 s
+Thu, 23 Nov 2017 03:48:20 knn.py[line:293] WARNING bad: 5442 != 4997 [('4997', 4), ('5442', 1), ('5446', 1), ('4411', 1), ('1469', 1)]
+Thu, 23 Nov 2017 03:48:20 knn.py[line:295] INFO right: 2 bad: 39 now: 41/44 Time: 0.467444 s
+Thu, 23 Nov 2017 03:48:21 knn.py[line:293] WARNING bad: 5442 != 1469 [('1469', 4), ('5446', 3), ('1465', 1), ('4976', 1), ('4411', 1)]
+Thu, 23 Nov 2017 03:48:21 knn.py[line:295] INFO right: 2 bad: 40 now: 42/44 Time: 0.473153 s
+Thu, 23 Nov 2017 03:48:21 knn.py[line:293] WARNING bad: 5442 != 4997 [('4997', 6), ('4976', 2), ('4411', 1), ('1448', 1)]
+Thu, 23 Nov 2017 03:48:21 knn.py[line:295] INFO right: 2 bad: 41 now: 43/44 Time: 0.470849 s
+Thu, 23 Nov 2017 03:48:22 knn.py[line:293] WARNING bad: 5446 != 4997 [('4997', 7), ('1465', 2), ('4976', 1)]
+Thu, 23 Nov 2017 03:48:22 knn.py[line:295] INFO right: 2 bad: 42 now: 44/44 Time: 0.480785 s

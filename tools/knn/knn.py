@@ -4,6 +4,7 @@ import os
 import time
 import cv2
 import logging
+import shutil
 
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
@@ -17,7 +18,125 @@ formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
-def load_all_img(path):
+
+def checkFold(name):
+    if not os.path.exists(name):
+        os.mkdir(name)
+
+
+def removeDir(dir):
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
+
+
+def removeFile(name):
+    if os.path.exists(name):
+        os.remove(name)
+
+def splits_resamples(facescrub_root, tilesPerImage=360):
+    #import sklearn
+    thresholdGLOABL = 0.42
+    from PIL import Image
+    import random
+    import math
+
+    fold = facescrub_root
+    print fold
+
+    subfolders = [folder for folder in os.listdir(
+        facescrub_root) if os.path.isdir(os.path.join(facescrub_root, folder))]
+    print subfolders
+
+    dict = {}
+    for subfolder in subfolders:
+        removeFile(os.path.join(facescrub_root, subfolder, 'test.npy'))
+        removeFile(os.path.join(facescrub_root, subfolder, 'train.npy'))
+        imgsfiles = [os.path.join(facescrub_root, subfolder, img)
+                     for img in os.listdir(os.path.join(facescrub_root, subfolder)) if img.endswith('.JPG')]
+        for img in imgsfiles:
+            dict[img] = subfolder
+    print dict
+
+    def im_crotate_image_square(im, deg):
+        im2 = im.rotate(deg, expand=1)
+        im = im.rotate(deg, expand=0)
+
+        width, height = im.size
+        if width == height:
+            im = im.crop((0, 0, w, int(h * 0.9)))
+            width, height = im.size
+
+        rads = math.radians(deg)
+        new_width = width - (im2.size[0] - width)
+
+        left = top = int((width - new_width) / 2)
+        right = bottom = int((width + new_width) / 2)
+
+        return im.crop((left, top, right, bottom))
+
+
+    dx = dy = 224
+    fold_idx = 1
+    rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
+                    Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
+
+    rotate45degree = [45, 135, 270]
+    subfolders = [folder for folder in os.listdir(
+        fold) if os.path.isdir(os.path.join(fold, folder))]
+    print 'files: %s' % subfolders
+
+    for subfolder in subfolders:
+        imgsfiles = [os.path.join(fold, subfolder, img)
+                     for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
+        print 'Start Directory: %s' % subfolder
+        for imgfile in imgsfiles:
+            print 'Start Image: %s' % imgfile
+            im = Image.open(imgfile)
+            w, h = im.size
+            im = im.crop((0, 0, w, int(h * 0.9)))
+            #dx = 224
+            for i in range(1, tilesPerImage + 1):
+                newname = imgfile.replace('.', '_{:03d}.'.format(i))
+                # print newname
+                w, h = im.size
+                if w < 224:
+                        im = cv2.resize(im, (224, h))
+                w, h = im.size
+                if h < 224:
+                        im = cv2.resize(im, (w, 224))
+                w, h = im.size
+
+                # print("Cropping",w,h)
+                if i < 100 and w > 300:
+                    dx = 224
+                if 100 < i < 200 and w > 500:
+                    dx = 320
+                if 200 < i < 300 and w > 800:
+                    dx = 640
+                if i < 100 and h > 300:
+                    dy = 224
+                if 100 < i < 200 and h > 500:
+                    dy = 320
+                if 200 < i < 300 and h > 800:
+                    dy = 640
+                x = random.randint(0, w - dx - 1)
+                y = random.randint(0, h - dy - 1)
+                #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
+                im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
+                if i % 2 == 0:  # roate 180,90
+                    im_cropped = im_cropped.transpose(
+                        random.choice(rotateAction))
+                if i % 2 == 0 and i > 300:
+                    roate_drgree = random.choice(rotate45degree)
+                    im_cropped = im_crotate_image_square(
+                        im_cropped, roate_drgree)
+                if w != 0 and h != 0:
+                    im_cropped.save(newname)
+            # don't remove startImg
+            # os.remove(imgfile)
+    return fold
+
+def load_all_img(path, not_double=True):
     import time
 
     subfolders = [folder for folder in os.listdir(
@@ -33,7 +152,7 @@ def load_all_img(path):
             imgArray = []
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
-            if os.path.exists(os.path.join(filepath2, 'knn.npy')):
+            if not_double and os.path.exists(os.path.join(filepath2, 'knn.npy')):
                 if len(np.load(os.path.join(filepath2, 'knn.npy'))) != 0:
                     continue
             subfolders3 = [folder for folder in os.listdir(
@@ -46,7 +165,7 @@ def load_all_img(path):
                 if m is not None:
                     im = cv2.cvtColor(m, cv2.COLOR_BGR2RGB)
                     im = cv2.resize(im, (224, 224))
-                    imgArray.append([im, file2])
+                    imgArray.append([im, file2, img])
                 else:
                     logging.error('Bad Image: %s' % filepath3)
             print 'SpeedTime: %f' % (time.time() - t1)
@@ -91,20 +210,57 @@ def getMinOfNum(a, K):
     a = np.array(a)
     return np.argpartition(a,-K)[-K:]
 
+def removeAllSplits(path):
+    imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
+    print 'del Img: %s' % imgList
+    for i in imgList:
+        removeFile(os.path.join(path, i))
+
 if __name__ == '__main__':
     import sys
     import getopt
     from collections import Counter  
     path = '/home/lol/dl/Image'
-
-    opts, args = getopt.getopt(sys.argv[1:], 'f:slt')
+    not_double = True
+    test_ratio = 0.02
+    tilesPerImage = 1
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:m')
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-z':
+            not_double = False
+        elif op == '-m':
+            subfolders = [folder for folder in os.listdir(
+                path) if os.path.isdir(os.path.join(path, folder))]
+            print subfolders
+            for file in subfolders:
+                path2 = os.path.join(path, file)
+                subfolders2 = [folder for folder in os.listdir(
+                    path2) if os.path.isdir(os.path.join(path2, folder))]
+                print subfolders2
+                for file2 in subfolders2:
+                    t_time = time.time()
+                    print 'Start ImageDir: %s ' % os.path.join(path2, file2)
+                    removeAllSplits(os.path.join(path2, file2))
+                    print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
+        elif op == '-i':
+            tilesPerImage = int(value)
+        elif op == '-a':
+            subfolders = [folder for folder in os.listdir(
+                path) if os.path.isdir(os.path.join(path, folder))]
+            print subfolders
+            for imgDir in subfolders:
+                t_time = time.time()
+                print 'Start ImageDir: %s ' % os.path.join(path, imgDir)
+                splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
+                print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path, imgDir), (time.time() - t_time))
+        elif op == '-r':
+            test_ratio = float(value)
         elif op == '-s':
-            load_all_img(path)
+            load_all_img(path, not_double=not_double)
         elif op == '-l':
-            test, train = load_all_beOne(path)
+            test, train = load_all_beOne(path, test_ratio=test_ratio)
             np.save(os.path.join(path, 'knn_test.npy'), test)
             np.save(os.path.join(path, 'knn_train.npy'), train)
         elif op == '-t':

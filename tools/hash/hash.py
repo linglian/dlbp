@@ -48,7 +48,7 @@ def load_all_beOne(path, test_ratio=0.02):
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' % os.path.join(filepath2, 'knn.npy'))
             for i in imgArray:
-                main_imgArray.append([getHash(i[0]), i[1]])
+                main_imgArray.append([getHash(i[0]), i[1], i[2]])
         print 'End Merge Npy: %d Speed Time: %f s' % (len(main_imgArray), (time.time() - tt))
     random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
@@ -65,12 +65,15 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     path = '/home/lol/dl/Image'
+    test_ratio = 0.02
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:lt')
+    opts, args = getopt.getopt(sys.argv[1:], 'f:ltr:')
 
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-r':
+            test_ratio = value
         elif op == '-l':
             test, train = load_all_beOne(path)
             np.save(os.path.join(path, 'hash_test.npy'), test)
