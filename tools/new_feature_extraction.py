@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 import numpy as np
 import cv2
 import sys
@@ -10,17 +10,21 @@ import shutil
 from collections import namedtuple
 Batch = namedtuple('Batch', ['data'])
 
+
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
+
 
 def removeDir(dir):
     if os.path.exists(dir):
         shutil.rmtree(dir)
 
+
 def removeFile(name):
     if os.path.exists(name):
         os.remove(name)
+
 
 def splits_resamples(facescrub_root):
     #import sklearn
@@ -61,7 +65,9 @@ def splits_resamples(facescrub_root):
         im = im.rotate(deg, expand=0)
 
         width, height = im.size
-        assert (width == height)
+        if width == height:
+            im = im.crop((0, 0, w, int(h * 0.9)))
+            width, height = im.size
 
         rads = math.radians(deg)
         new_width = width - (im2.size[0] - width)
@@ -71,7 +77,7 @@ def splits_resamples(facescrub_root):
 
         return im.crop((left, top, right, bottom))
 
-    tilesPerImage = 360
+    tilesPerImage = 16
 
     dx = dy = 224
     fold_idx = 1
@@ -100,6 +106,13 @@ def splits_resamples(facescrub_root):
                 newname = imgfile.replace('.', '_{:03d}.'.format(i))
                 # print newname
                 w, h = im.size
+                if w < 224:
+                        im = cv2.resize(im, (224, h))
+                w, h = im.size
+                if h < 224:
+                        im = cv2.resize(im, (w, 224))
+                w, h = im.size
+
                 # print("Cropping",w,h)
                 if i < 100 and w > 300:
                     dx = 224
@@ -116,7 +129,7 @@ def splits_resamples(facescrub_root):
                 x = random.randint(0, w - dx - 1)
                 y = random.randint(0, h - dy - 1)
                 #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
-                im_cropped = im.crop((x, y, x + dx, y + dy))
+                im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
                 if i % 2 == 0:  # roate 180,90
                     im_cropped = im_cropped.transpose(
                         random.choice(rotateAction))
@@ -125,10 +138,12 @@ def splits_resamples(facescrub_root):
                     im_cropped = im_crotate_image_square(
                         im_cropped, roate_drgree)
                 newname = newname.replace(fold, fold + '/examples')
-                im_cropped.save(newname)
+                if w != 0 and h != 0:
+                    im_cropped.save(newname)
             # don't remove startImg
             # os.remove(imgfile)
     return fold + '/examples'
+
 
 def get_image(path):
     # download and show the image
@@ -140,30 +155,28 @@ def get_image(path):
     img = img[np.newaxis, :]  # extend to (n, c, h, w)
     return img
 
+
 def getFeatures(img, f_mod):
     img = get_image(img)
-    f_mod.forward(Batch([mx.nd.array(img)]))
-    features = f_mod.get_outputs()[0].asnumpy()
-    return features
+    f = f_mod.predict(img)
+    f = np.ravel(f)
+    return f
+
 
 def init(GPUid=0):
-    sym, arg_params,aux_params = mx.model.load_checkpoint('full-resnet-152',0)
+    prefix = "full-resnet-152"
+    num_round = 0
+    model = mx.model.FeedForward.load(
+        prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
+    internals = model.symbol.get_internals()
+    fea_symbol = internals["pool1_output"]
+    feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
+                                             arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
 
-    mod= mx.mod.Module(symbol=sym, context=mx.gpu(), label_names=None)
-    mod.bind(for_training=False, data_shapes=[('data', (1,3,224,224))])
-    mod.set_params(arg_params, aux_params, allow_missing=True)
-
-    all_layers = sym.get_internals()
-    f = all_layers['fc1_output']
-
-    f_mod = mx.mod.Module(symbol=f, context=mx.gpu(GPUid), label_names=None)
-    f_mod.bind(for_training=False, data_shapes=[('data', (1,3,224,224))])
-    f_mod.set_params(arg_params, aux_params, allow_missing=True)
-
-    return f_mod
+    return feature_extractor
 
 
-def batch(folder, loadfolder, test_ratio = 0.02):
+def batch(folder, loadfolder, test_ratio=0.02):
     import numpy as np
     import cv2
     import sys
@@ -175,14 +188,14 @@ def batch(folder, loadfolder, test_ratio = 0.02):
     import random
     import multiprocessing
 
-    def handleFolder(GUPid, tasks):
+    def handleFolder(GPUid, tasks):
         k = 0
-        mod = init(GUPid)
-        print 'Start tasks: %s' %tasks 
+        mod = init(GPUid)
+        print 'Start tasks: %s' % tasks
         for subfolder in tasks:
             workspace_folder = os.path.join(folder, subfolder)
-            load_folder =  os.path.join(loadfolder, subfolder)
-            print "extract label####", subfolder, "---GPU: ", GUPid, " process: ", k, "/", len(tasks)
+            load_folder = os.path.join(loadfolder, subfolder)
+            print "extract label####", subfolder, "---GPU: ", GPUid, " process: ", k, "/", len(tasks)
             i = 0
             k += 1
             feature_array = []
@@ -191,8 +204,9 @@ def batch(folder, loadfolder, test_ratio = 0.02):
                 # print 'Start : %s' % filename
                 if '.jpg' in filename or '.JPG' in filename:
                     i += 1
-                    f = getFeatures(os.path.join(workspace_folder, filename), mod)
-                    feature_array.append((f[0], subfolder, filename))
+                    f = getFeatures(os.path.join(
+                        workspace_folder, filename), mod)
+                    feature_array.append((f, subfolder, filename))
                 # print 'End : %s' % filename
             random.shuffle(feature_array)
             # print len(feature_array)
@@ -217,7 +231,7 @@ def batch(folder, loadfolder, test_ratio = 0.02):
     z = 0
     for i in GPUvector:
         mp_kwargs = dict(
-            GUPid=i,
+            GPUid=i,
             tasks=fa[z]
         )
         p = multiprocessing.Process(target=handleFolder, kwargs=mp_kwargs)
@@ -231,8 +245,8 @@ def batch(folder, loadfolder, test_ratio = 0.02):
     print "whole process time:", time.time() - t1
 
 
-if __name__=='__main__':
-    
+if __name__ == '__main__':
+
     filePath = '/home/lol/dl/Image'
 
     import time
@@ -260,7 +274,7 @@ if __name__=='__main__':
         removeDir(sp)
         print '$$$$$$$$$$$ End: ', path, 'End Time: ', time.time()
         print 'Speed Time: ', time.time() - t1
-    
+
     train_array = []
     test_array = []
     for file in subfolders:
@@ -276,4 +290,3 @@ if __name__=='__main__':
             train_array.append(train)
     np.save(os.path.join(filePath, 'train.npy'), train_array)
     np.save(os.path.join(filePath, 'test.npy'), test_array)
-

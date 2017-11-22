@@ -18,7 +18,7 @@ def handleFolder(GUPid,tasks):
     num_round = 0	
     model = mx.model.FeedForward.load( prefix, num_round, ctx=mx.gpu(GUPid),numpy_batch_size=1)
     internals = model.symbol.get_internals()
-    fea_symbol = internals["fc1_output"]	  
+    fea_symbol = internals["pool1_output"]	  
     feature_extractor = mx.model.FeedForward( ctx=mx.gpu(GUPid), symbol=fea_symbol, numpy_batch_size=1, \
             arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
 			
@@ -40,6 +40,7 @@ def handleFolder(GUPid,tasks):
           img = np.swapaxes(img, 1, 2)  # change to (c, h,w) order
           img = img[np.newaxis, :]  # extend to (n, c, h, w)
           f = feature_extractor.predict(img)
+          f = np.ravel(f)
           #print f.shape		  
           feature_array.append((f[0],subfolder,filename))
       random.shuffle(feature_array)

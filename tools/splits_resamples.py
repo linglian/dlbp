@@ -31,7 +31,6 @@ def checkFold(name):
 
 tilesPerImage = 360
 fold = facescrub_root
-checkFold(fold + '/examples')
 
 dx = dy = 224
 fold_idx = 1
@@ -60,11 +59,14 @@ def im_crotate_image_square(im, deg):
     return im.crop((left, top, right, bottom))
 
 
+
+checkFold(fold + '/examples')
+
 for subfolder in subfolders:
     imgsfiles = [os.path.join(fold, subfolder, img)
                  for img in os.listdir(os.path.join(fold, subfolder))]
+    checkFold(fold + '/examples/' + subfolder)
     for imgfile in imgsfiles:
-        checkFold(fold + '/examples/' + subfolder)
 
         im = Image.open(imgfile)
         w, h = im.size
