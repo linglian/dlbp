@@ -95,8 +95,6 @@ def splits_resamples(facescrub_root):
             im = Image.open(imgfile)
             w, h = im.size
             im = im.crop((0, 0, w, int(h * 0.9)))
-            if w < 224:
-                
             #dx = 224
             for i in range(1, tilesPerImage + 1):
                 newname = imgfile.replace('.', '_{:03d}.'.format(i))
