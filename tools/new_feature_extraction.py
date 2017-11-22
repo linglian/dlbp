@@ -95,6 +95,8 @@ def splits_resamples(facescrub_root):
             im = Image.open(imgfile)
             w, h = im.size
             im = im.crop((0, 0, w, int(h * 0.9)))
+            if w < 224:
+                
             #dx = 224
             for i in range(1, tilesPerImage + 1):
                 newname = imgfile.replace('.', '_{:03d}.'.format(i))
@@ -102,11 +104,17 @@ def splits_resamples(facescrub_root):
                 w, h = im.size
                 # print("Cropping",w,h)
                 if i < 100 and w > 300:
-                    dx = dy = 224
+                    dx = 224
                 if 100 < i < 200 and w > 500:
-                    dx = dy = 320
+                    dx = 320
                 if 200 < i < 300 and w > 800:
-                    dx = dy = 640
+                    dx = 640
+                if i < 100 and h > 300:
+                    dy = 224
+                if 100 < i < 200 and h > 500:
+                    dy = 320
+                if 200 < i < 300 and h > 800:
+                    dy = 640
                 x = random.randint(0, w - dx - 1)
                 y = random.randint(0, h - dy - 1)
                 #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
