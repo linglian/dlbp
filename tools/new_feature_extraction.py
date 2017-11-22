@@ -237,45 +237,42 @@ if __name__=='__main__':
 
     import time
 
-    # opts, args = getopt.getopt(sys.argv[1:], 'f:sf:')
-    # for op, value in opts:
-    #     if op == '-f':
-    #         filePath = value
-    #         sp = splits_resamples(filePath)
-    #         batch(sp, filePath)
-    #         removeDir(sp)
-    #     elif op == '-sf':
-    #         filePath = value
-    #         subfolders = [folder for folder in os.listdir(
-    #             filePath) if os.path.isdir(os.path.join(filePath, folder))]
-    #         print subfolders
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sf:')
+    for op, value in opts:
+        if op == '-f':
+            filePath = value
+            sp = splits_resamples(filePath)
+            batch(sp, filePath)
+            removeDir(sp)
+        elif op == '-sf':
+            filePath = value
+            subfolders = [folder for folder in os.listdir(
+                filePath) if os.path.isdir(os.path.join(filePath, folder))]
+            print subfolders
 
-    subfolders = [folder for folder in os.listdir(
-        filePath) if os.path.isdir(os.path.join(filePath, folder))]
-    print subfolders
+            for file in subfolders:
+                t1 = time.time()
+                path = os.path.join(filePath, file)
+                print '$$$$$$$$$$$ Start: ', path, 'Begin Time: ', t1
+                sp = splits_resamples(path)
+                batch(sp, path)
+                removeDir(sp)
+                print '$$$$$$$$$$$ End: ', path, 'End Time: ', time.time()
+                print 'Speed Time: ', time.time() - t1
+            
+            train_array = []
+            test_array = []
+            for file in subfolders:
+                path = os.path.join(filePath, file)
+                subfolders2 = [folder for folder in os.listdir(
+                    path) if os.path.isdir(os.path.join(path, folder))]
+                print subfolders2
+                for file2 in subfolders2:
+                    path2 = os.path.join(path, file2)
+                    test = np.load(os.path.join(path2, 'test.npy'))
+                    test_array.append(test)
+                    train = np.load(os.path.join(path2, 'train.npy'))
+                    train_array.append(train)
+            np.save(os.path.join(filePath, 'train.npy'), train_array)
+            np.save(os.path.join(filePath, 'test.npy'), test_array)
 
-    for file in subfolders:
-        t1 = time.time()
-        path = os.path.join(filePath, file)
-        print '$$$$$$$$$$$ Start: ', path, 'Begin Time: ', t1
-        sp = splits_resamples(path)
-        batch(sp, path)
-        removeDir(sp)
-        print '$$$$$$$$$$$ End: ', path, 'End Time: ', time.time()
-        print 'Speed Time: ', time.time() - t1
-    
-    train_array = []
-    test_array = []
-    for file in subfolders:
-        path = os.path.join(filePath, file)
-        subfolders2 = [folder for folder in os.listdir(
-            path) if os.path.isdir(os.path.join(path, folder))]
-        print subfolders2
-        for file2 in subfolders2:
-            path2 = os.path.join(path, file2)
-            test = np.load(os.path.join(path2, 'test.npy'))
-            test_array.append(test)
-            train = np.load(os.path.join(path2, 'train.npy'))
-            train_array.append(train)
-    np.save(os.path.join(filePath, 'train.npy'), train_array)
-    np.save(os.path.join(filePath, 'test.npy'), test_array)
