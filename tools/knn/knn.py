@@ -34,7 +34,8 @@ def load_all_img(path):
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             if os.path.exists(os.path.join(filepath2, 'knn.npy')):
-                continue
+                if len(np.load(os.path.join(filepath2, 'knn.npy'))) != 0:
+                    continue
             subfolders3 = [folder for folder in os.listdir(
                 filepath2) if not os.path.isdir(os.path.join(filepath2, folder)) and os.path.join(filepath2, folder).endswith('.JPG')]
             print subfolders3
@@ -54,12 +55,13 @@ def load_all_img(path):
 
 def load_all_beOne(path, test_ratio=0.02):
     import time
-
+    import random
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     print subfolders
-
+    tt = time.time()
     main_imgArray = []
+    print 'Start Merge Npy'
     for file in subfolders:
         filepath = os.path.join(path, file)
         subfolders2 = [folder for folder in os.listdir(
@@ -70,9 +72,12 @@ def load_all_beOne(path, test_ratio=0.02):
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             imgArray = np.load(os.path.join(filepath2, 'knn.npy'))
+            if len(imgArray) == 0:
+                logging.error('Bad Npy: %s' % os.path.join(filepath2, 'knn.npy'))
             for i in imgArray:
                 main_imgArray.append(i)
-        print len(main_imgArray)
+        print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
+    random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
 
 
@@ -116,20 +121,16 @@ if __name__ == '__main__':
                 for j in train:
                     tempJ = np.ravel(j[0])
                     dist = getDistances(tempI, tempJ)
-                    logging.info('dist: %f' % dist)
                     minD.append([dist, j[1]])
                 label = [x[1] for x in minD]
                 label = np.array(label)
-                t1 = np.array(getMinOfNum([x[0] for x in minD], 10))
-                t2 = label[t1]
-                print t1
-                print t2
-                print Counter(t2)
-                break
-                # if minD[1] == i[1]:
-                #     right += 1
-                # else:
-                #     bad += 1
-                #     logging.warn('bad: %s != %s' % (i[1], minD[1]))
+                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
+                tempArray2 = label[tempArray1]
+                la = Counter(tempArray2).most_common(1)[0][0]
+                if la == i[1]:
+                    right += 1
+                else:
+                    bad += 1
+                    logging.warn('bad: %s != %s' % (i[1], la))
                 now += 1
                 logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))

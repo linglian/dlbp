@@ -1,0 +1,3 @@
+Thu, 23 Nov 2017 00:12:39 knn.py[line:116] INFO test: 1  train: 59
+Thu, 23 Nov 2017 00:12:39 knn.py[line:134] WARNING bad: 6418 != 1448
+Thu, 23 Nov 2017 00:12:39 knn.py[line:136] INFO right: 0 bad: 1 now: 1/1 Time: 0.013830 s
