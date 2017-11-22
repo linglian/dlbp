@@ -61,6 +61,7 @@ def load_all_beOne(path, test_ratio=0.02):
     print subfolders
     tt = time.time()
     main_imgArray = []
+    per = 0
     print 'Start Merge Npy'
     for file in subfolders:
         filepath = os.path.join(path, file)
@@ -72,6 +73,7 @@ def load_all_beOne(path, test_ratio=0.02):
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             imgArray = np.load(os.path.join(filepath2, 'knn.npy'))
+            print 'Load Knn.npy: %s' % (os.path.join(filepath2, 'knn.npy'))
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' % os.path.join(filepath2, 'knn.npy'))
             for i in imgArray:
