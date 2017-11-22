@@ -3,7 +3,19 @@ import numpy as np
 import os
 import time
 import cv2
+import logging
 
+logging.basicConfig(level=logging.DEBUG,
+                format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S',
+                filename='test.log',
+                filemode='w')
+
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 def load_all_img(path):
     import time
@@ -21,6 +33,8 @@ def load_all_img(path):
             imgArray = []
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
+            if os.path.exists(os.path.join(filepath2, 'knn.npy')):
+                continue
             subfolders3 = [folder for folder in os.listdir(
                 filepath2) if not os.path.isdir(os.path.join(filepath2, folder)) and os.path.join(filepath2, folder).endswith('.JPG')]
             print subfolders3
@@ -28,9 +42,12 @@ def load_all_img(path):
                 filepath3 = os.path.join(filepath2, img)
                 print filepath3
                 m = cv2.imread(filepath3, 1)
-                im = cv2.cvtColor(m, cv2.COLOR_BGR2RGB)
-                im = cv2.resize(im, (224, 224))
-                imgArray.append([im, file2])
+                if m is not None:
+                    im = cv2.cvtColor(m, cv2.COLOR_BGR2RGB)
+                    im = cv2.resize(im, (224, 224))
+                    imgArray.append([im, file2])
+                else:
+                    logging.error('Bad Image: %s' % filepath3)
             print 'SpeedTime: %f' % (time.time() - t1)
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
 
@@ -63,9 +80,14 @@ def getDistances(form, to):
     return np.sqrt(np.sum(np.square(form - to)))
 
 
+def getMinOfNum(a, K):
+    a = np.array(a)
+    return np.argpartition(a,-K)[-K:]
+
 if __name__ == '__main__':
     import sys
     import getopt
+    from collections import Counter  
     path = '/home/lol/dl/Image'
 
     opts, args = getopt.getopt(sys.argv[1:], 'f:slt')
@@ -83,24 +105,31 @@ if __name__ == '__main__':
             train = np.load(os.path.join(path, 'knn_train.npy'))
             testNum = len(test)
             trainNum = len(train)
-            print train[:]
             right = 0
             bad = 0
             now = 0
-            print 'test: %d  train: %d' % (testNum, trainNum)
+            logging.info('test: %d  train: %d' % (testNum, trainNum))
             for i in test:
                 t1 = time.time()
-                minD = [999, 'None']
+                minD = []
                 tempI = np.ravel(i[0])
                 for j in train:
                     tempJ = np.ravel(j[0])
                     dist = getDistances(tempI, tempJ)
-                    if dist < minD[0]:
-                        minD[0] = dist
-                        minD[1] = j[1]
-                if minD[1] == i[1]:
-                    right += 1
-                else:
-                    bad += 1
+                    logging.info('dist: %f' % dist)
+                    minD.append([dist, j[1]])
+                label = [x[1] for x in minD]
+                label = np.array(label)
+                t1 = np.array(getMinOfNum([x[0] for x in minD], 10))
+                t2 = label[t1]
+                print t1
+                print t2
+                print Counter(t2)
+                break
+                # if minD[1] == i[1]:
+                #     right += 1
+                # else:
+                #     bad += 1
+                #     logging.warn('bad: %s != %s' % (i[1], minD[1]))
                 now += 1
-                print 'right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1))
+                logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
