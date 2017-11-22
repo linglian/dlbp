@@ -128,11 +128,12 @@ if __name__ == '__main__':
                 label = np.array(label)
                 tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
                 tempArray2 = label[tempArray1]
-                la = Counter(tempArray2).most_common(1)[0][0]
+                cu = Counter(tempArray2)
+                la = cu.most_common(1)[0][0]
                 if la == i[1]:
                     right += 1
                 else:
                     bad += 1
-                    logging.warn('bad: %s != %s' % (i[1], la))
+                    logging.warn('bad: %s != %s %s' % (i[1], la, cu.most_common(5)))
                 now += 1
                 logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))

@@ -53,7 +53,7 @@ def load_all_beOne(path, test_ratio=0.02):
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
 
 def getDistances(f, t):
-    return f[0] - t[0]
+    return f[0].__sub__(t[0])
 
 def getMinOfNum(a, K):
     a = np.array(a)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     path = '/home/lol/dl/Image'
-    test, train = load_all_beOne(path, test_ratio=0.02)
+    test, train = load_all_beOne(path, test_ratio=0.32)
     testNum = len(test)
     trainNum = len(train)
     right = 0
@@ -79,18 +79,18 @@ if __name__ == '__main__':
         for j in train:
             tempJ = np.ravel(j[0])
             dist = getDistances(tempI, tempJ)
-            print dist
             minD.append([dist, j[1]])
         label = [x[1] for x in minD]
         label = np.array(label)
-        tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 5))
+        tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
         tempArray2 = label[tempArray1]
-        la = Counter(tempArray2).most_common(1)[0][0]
+        cu = Counter(tempArray2)
+        la = cu.most_common(1)[0][0]
         if la == i[1]:
             right += 1
         else:
             bad += 1
-            logging.warn('bad: %s != %s' % (i[1], la))
+            logging.warn('bad: %s != %s %s' % (i[1], la, cu.most_common(5)))
         now += 1
         logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
     
