@@ -209,7 +209,7 @@ def getDistances(form, to):
 
 def getMinOfNum(a, K):
     a = np.array(a)
-    return np.sort(a, axis=0)[0:K]
+    return sorted(a, key=lambda a: a[0])[0:K]
 
 def removeAllSplits(path):
     imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
@@ -279,6 +279,7 @@ if __name__ == '__main__':
                     minD.append([dist, j[1], j[2]])
                 temp = getMinOfNum(minD, k)
                 cu = Counter([x[1] for x in temp])
+                print cu
                 la = cu.most_common(1)[0][0]
                 if la == i[1]:
                     right += 1
