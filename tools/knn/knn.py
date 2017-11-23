@@ -230,7 +230,7 @@ if __name__ == '__main__':
         if op == '-f':
             path = value
         elif op == '-k':
-            not_double = int(value)
+            k = int(value)
         elif op == '-z':
             not_double = False
         elif op == '-m':
@@ -287,7 +287,7 @@ if __name__ == '__main__':
                 img = [x[2] for x in minD]
                 label = np.array(label)
                 img = np.array(img)
-                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], k))
+                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
                 tempArray2 = label[tempArray1]
                 tempArray3 = img[tempArray1]
                 cu = Counter(tempArray2)

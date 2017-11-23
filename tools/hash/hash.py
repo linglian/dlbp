@@ -66,12 +66,14 @@ if __name__ == '__main__':
     from collections import Counter
     path = '/home/lol/dl/Image'
     test_ratio = 0.02
-
-    opts, args = getopt.getopt(sys.argv[1:], 'f:ltr:')
+    k = 1
+    opts, args = getopt.getopt(sys.argv[1:], 'f:ltr:k:')
 
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-k':
+            k = int(value)
         elif op == '-r':
             test_ratio = value
         elif op == '-l':
@@ -98,7 +100,7 @@ if __name__ == '__main__':
                     minD.append([dist, j[1]])
                 label = [x[1] for x in minD]
                 label = np.array(label)
-                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
+                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], k))
                 tempArray2 = label[tempArray1]
                 cu = Counter(tempArray2)
                 la = cu.most_common(1)[0][0]
