@@ -77,7 +77,7 @@ def splits_resamples(facescrub_root):
 
         return im.crop((left, top, right, bottom))
 
-    tilesPerImage = 16
+    tilesPerImage = 1
 
     dx = dy = 224
     fold_idx = 1
@@ -158,6 +158,15 @@ def get_image(path):
 
 def getFeatures(img, f_mod):
     img = get_image(img)
+    print img
+    print len(img)
+    print img[0]
+    print len(img[0])
+    print img[0][0]
+    print len(img[0][0])
+    print img[0][0][0]
+    print len(img[0][0][0])
+    print type(img[0][0][0][0])
     f = f_mod.predict(img)
     f = np.ravel(f)
     return f
@@ -206,6 +215,8 @@ def batch(folder, loadfolder, test_ratio=0.02):
                     i += 1
                     f = getFeatures(os.path.join(
                         workspace_folder, filename), mod)
+                    
+                    print f
                     feature_array.append((f, subfolder, filename))
                 # print 'End : %s' % filename
             random.shuffle(feature_array)
@@ -246,7 +257,6 @@ def batch(folder, loadfolder, test_ratio=0.02):
 
 
 if __name__ == '__main__':
-
     filePath = '/home/lol/dl/Image'
 
     import time

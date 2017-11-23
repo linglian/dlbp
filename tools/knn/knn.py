@@ -5,6 +5,8 @@ import time
 import cv2
 import logging
 import shutil
+import sys
+from PIL import Image
 
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
@@ -17,7 +19,6 @@ console.setLevel(logging.INFO)
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
-
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -208,13 +209,39 @@ def getDistances(form, to):
 
 def getMinOfNum(a, K):
     a = np.array(a)
-    return np.argpartition(a,-K)[-K:]
+    return np.sort(a, axis=0)[0:K]
 
 def removeAllSplits(path):
     imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
     print 'del Img: %s' % imgList
     for i in imgList:
         removeFile(os.path.join(path, i))
+
+
+def getImage(img):
+    img = np.swapaxes(img, 0, 2)
+    img = np.swapaxes(img, 1, 2)
+    img = img[np.newaxis, :]
+    return img
+
+def getFeatures(img, f_mod):
+    img = getImage(img)
+    f = f_mod.predict(img)
+    f = np.ravel(f)
+    return f
+
+def init(GPUid=0):
+    import mxnet as mx
+    prefix = "/home/lol/dl/full-resnet-152"
+    num_round = 0
+    model = mx.model.FeedForward.load(
+        prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
+    internals = model.symbol.get_internals()
+    fea_symbol = internals["pool1_output"]
+    feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
+                                             arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
+
+    return feature_extractor
 
 if __name__ == '__main__':
     import sys
@@ -225,10 +252,63 @@ if __name__ == '__main__':
     test_ratio = 0.02
     tilesPerImage = 1
     k = 1
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:')
+    mxnetpath = '/home/lol/dl/mxnet/python'
+    sys.path.insert(0, mxnetpath)
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v')
+    a = [[1, 'asd'], [5, 'asdff'], [3, 'asd']]
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-v':
+            testList = np.load(os.path.join(path, 'feature_test.npy'))
+            trainList = np.load(os.path.join(path, 'feature_train.npy'))
+            testNum = len(testList)
+            trainNum = len(trainList)
+            right = 0
+            bad = 0
+            now = 0
+            m_t = time.time()
+            logging.info('Start test: %d  train: %d' % (testNum, trainNum))
+            for i in testList:
+                t1 = time.time()
+                minD = []
+                tempI = np.ravel(i[0])
+                for j in trainList:
+                    tempJ = np.ravel(j[0])
+                    dist = getDistances(tempI, tempJ)
+                    minD.append([dist, j[1], j[2]])
+                temp = getMinOfNum(minD, k)
+                cu = Counter([x[1] for x in temp])
+                la = cu.most_common(1)[0][0]
+                if la == i[1]:
+                    right += 1
+                else:
+                    bad += 1
+                    print temp
+                    logging.warn('bad: %s != %s' % (i[1], la))
+                now += 1
+                logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+            logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
+        elif op == '-g':
+            test = np.load(os.path.join(path, 'knn_test.npy'))
+            train = np.load(os.path.join(path, 'knn_train.npy'))
+            testNum = len(test)
+            trainNum = len(train)
+            m_t = time.time()
+            print 'Start Feature: Test: %d Train: %d' % (testNum, trainNum)
+            mod = init()
+            testList = []
+            for i in test:
+                testList.append([getFeatures(i[0], mod), i[1], i[2]])
+            trainList = []
+            for i in train:
+                trainList.append([getFeatures(i[0], mod), i[1], i[2]])
+            np.save(os.path.join(path, 'feature_test.npy'), testList)
+            np.save(os.path.join(path, 'feature_train.npy'), trainList)
+            print 'End Feature: Speed Time %f' % (time.time() - m_t)
+        elif op == '-x':
+            mxnetpath = value
+            sys.path.insert(0, mxnetpath)
         elif op == '-k':
             k = int(value)
         elif op == '-z':
