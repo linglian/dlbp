@@ -20,6 +20,18 @@ formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
+
+path = '/home/lol/dl/Image'
+not_double = True
+test_ratio = 0.02
+tilesPerImage = 1
+k = 1
+times = 1
+mxnetpath = '/home/lol/dl/mxnet/python'
+test_name = 'knn'
+sys.path.insert(0, mxnetpath)
+resetTest = False
+
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
@@ -243,82 +255,135 @@ def init(GPUid=0):
 
     return feature_extractor
 
+def removeAllSpliteOfPath():
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    print subfolders
+    for file in subfolders:
+        path2 = os.path.join(path, file)
+        subfolders2 = [folder for folder in os.listdir(
+            path2) if os.path.isdir(os.path.join(path2, folder))]
+        print subfolders2
+        for file2 in subfolders2:
+            t_time = time.time()
+            print 'Start ImageDir: %s ' % os.path.join(path2, file2)
+            removeAllSplits(os.path.join(path2, file2))
+            print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
+
+def loadFeature():
+    test = np.load(os.path.join(path, 'knn_test.npy'))
+    train = np.load(os.path.join(path, 'knn_train.npy'))
+    testNum = len(test)
+    trainNum = len(train)
+    m_t = time.time()
+    print 'Start Feature: Test: %d Train: %d' % (testNum, trainNum)
+    mod = init()
+    testList = []
+    n = 0
+    t_time = time.time()
+    for i in test:
+        testList.append([getFeatures(i[0], mod), i[1], i[2]])
+        n += 1
+        if n % 500 == 0:
+            print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
+            t_time = time.time()
+    trainList = []
+    n = 0
+    t_time = time.time()
+    for i in train:
+        trainList.append([getFeatures(i[0], mod), i[1], i[2]])
+        n += 1
+        if n % 500 == 0:
+            print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
+            t_time = time.time()
+    np.save(os.path.join(path, 'feature_test.npy'), testList)
+    np.save(os.path.join(path, 'feature_train.npy'), trainList)
+    print 'End Feature: Speed Time %f' % (time.time() - m_t)
+
+def resetRandom():
+    test = np.load(os.path.join(path, test_name + '_test.npy'))
+    train = np.load(os.path.join(path, test_name + '_train.npy'))
+    testNum = len(test)
+    trainNum = len(train)
+    num = testNum + trainNum
+    tempList = []
+    # print 'Start Random: %d + %d = %d' % (testNum, trainNum, num)
+    for i in test:
+        tempList.append(i)
+    for i in train:
+        tempList.append(i)
+    random.shuffle(tempList)
+    # print 'End Random: %d + %d = %d' % (testNum, trainNum, num)
+    np.save(os.path.join(path, test_name + '_test.npy'), tempList[:int(num * test_ratio)])
+    np.save(os.path.join(path, test_name + '_train.npy'), tempList[int(num * test_ratio):])
+
+def spliteAllOfPath():
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    print subfolders
+    for imgDir in subfolders:
+        t_time = time.time()
+        print 'Start ImageDir: %s ' % os.path.join(path, imgDir)
+        splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
+        print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path, imgDir), (time.time() - t_time))
+
+def runTest():
+    m_bad = 0
+    m_right = 0
+    m_num = 0
+    for main_times in range(0, times):
+        if resetTest:
+            resetRandom()
+        test = np.load(os.path.join(path, test_name + '_test.npy'))
+        train = np.load(os.path.join(path, test_name + '_train.npy'))
+        testNum = len(test)
+        trainNum = len(train)
+        right = 0
+        bad = 0
+        now = 0
+        m_t = time.time()
+        logging.info('Start test: %d  train: %d' % (testNum, trainNum))
+        for i in test:
+            t1 = time.time()
+            minD = []
+            tempI = np.ravel(i[0])
+            for j in train:
+                tempJ = np.ravel(j[0])
+                dist = getDistances(tempI, tempJ)
+                minD.append([dist, j[1], j[2]])
+            temp = getMinOfNum(minD, k)
+            cu = Counter([x[1] for x in temp])
+            la = cu.most_common(1)[0][0]
+            if la == i[1]:
+                right += 1
+            else:
+                bad += 1
+                print temp
+                logging.warn('bad: %s != %s' % (i[1], la))
+            now += 1
+            logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+        logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
+        m_num += now
+        m_bad += bad
+        m_right += right
+    print 'Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0)
+    print 'Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0)
+
 if __name__ == '__main__':
     import sys
     import getopt
-    from collections import Counter  
-    path = '/home/lol/dl/Image'
-    not_double = True
-    test_ratio = 0.02
-    tilesPerImage = 1
-    k = 1
-    mxnetpath = '/home/lol/dl/mxnet/python'
-    sys.path.insert(0, mxnetpath)
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v')
-    a = [[1, 'asd'], [5, 'asdff'], [3, 'asd']]
+    from collections import Counter
+    import random  
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time='])
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-h':
+            resetTest = True
         elif op == '-v':
-            testList = np.load(os.path.join(path, 'feature_test.npy'))
-            trainList = np.load(os.path.join(path, 'feature_train.npy'))
-            testNum = len(testList)
-            trainNum = len(trainList)
-            right = 0
-            bad = 0
-            now = 0
-            m_t = time.time()
-            logging.info('Start test: %d  train: %d' % (testNum, trainNum))
-            for i in testList:
-                t1 = time.time()
-                minD = []
-                tempI = np.ravel(i[0])
-                for j in trainList:
-                    tempJ = np.ravel(j[0])
-                    dist = getDistances(tempI, tempJ)
-                    minD.append([dist, j[1], j[2]])
-                temp = getMinOfNum(minD, k)
-                cu = Counter([x[1] for x in temp])
-                print cu
-                la = cu.most_common(1)[0][0]
-                if la == i[1]:
-                    right += 1
-                else:
-                    bad += 1
-                    print temp
-                    logging.warn('bad: %s != %s' % (i[1], la))
-                now += 1
-                logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
-            logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
+            test_name = value
         elif op == '-g':
-            test = np.load(os.path.join(path, 'knn_test.npy'))
-            train = np.load(os.path.join(path, 'knn_train.npy'))
-            testNum = len(test)
-            trainNum = len(train)
-            m_t = time.time()
-            print 'Start Feature: Test: %d Train: %d' % (testNum, trainNum)
-            mod = init()
-            testList = []
-            n = 0
-            t_time = time.time()
-            for i in test:
-                testList.append([getFeatures(i[0], mod), i[1], i[2]])
-                n += 1
-                if n % 500 == 0:
-                    print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
-                    t_time = time.time()
-            trainList = []
-            n = 0
-            t_time = time.time()
-            for i in train:
-                trainList.append([getFeatures(i[0], mod), i[1], i[2]])
-                n += 1
-                if n % 500 == 0:
-                    print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
-                    t_time = time.time()
-            np.save(os.path.join(path, 'feature_test.npy'), testList)
-            np.save(os.path.join(path, 'feature_train.npy'), trainList)
-            print 'End Feature: Speed Time %f' % (time.time() - m_t)
+            loadFeature()
         elif op == '-x':
             mxnetpath = value
             sys.path.insert(0, mxnetpath)
@@ -327,30 +392,13 @@ if __name__ == '__main__':
         elif op == '-z':
             not_double = False
         elif op == '-m':
-            subfolders = [folder for folder in os.listdir(
-                path) if os.path.isdir(os.path.join(path, folder))]
-            print subfolders
-            for file in subfolders:
-                path2 = os.path.join(path, file)
-                subfolders2 = [folder for folder in os.listdir(
-                    path2) if os.path.isdir(os.path.join(path2, folder))]
-                print subfolders2
-                for file2 in subfolders2:
-                    t_time = time.time()
-                    print 'Start ImageDir: %s ' % os.path.join(path2, file2)
-                    removeAllSplits(os.path.join(path2, file2))
-                    print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
+            removeAllSpliteOfPath()
         elif op == '-i':
             tilesPerImage = int(value)
+        elif op == '--time':
+            times = int(value)
         elif op == '-a':
-            subfolders = [folder for folder in os.listdir(
-                path) if os.path.isdir(os.path.join(path, folder))]
-            print subfolders
-            for imgDir in subfolders:
-                t_time = time.time()
-                print 'Start ImageDir: %s ' % os.path.join(path, imgDir)
-                splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
-                print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path, imgDir), (time.time() - t_time))
+            spliteAllOfPath()
         elif op == '-r':
             test_ratio = float(value)
         elif op == '-s':
@@ -360,36 +408,4 @@ if __name__ == '__main__':
             np.save(os.path.join(path, 'knn_test.npy'), test)
             np.save(os.path.join(path, 'knn_train.npy'), train)
         elif op == '-t':
-            test = np.load(os.path.join(path, 'knn_test.npy'))
-            train = np.load(os.path.join(path, 'knn_train.npy'))
-            testNum = len(test)
-            trainNum = len(train)
-            right = 0
-            bad = 0
-            now = 0
-            logging.info('test: %d  train: %d' % (testNum, trainNum))
-            for i in test:
-                t1 = time.time()
-                minD = []
-                tempI = np.ravel(i[0])
-                for j in train:
-                    tempJ = np.ravel(j[0])
-                    dist = getDistances(tempI, tempJ)
-                    minD.append([dist, j[1], j[2]])
-                label = [x[1] for x in minD]
-                img = [x[2] for x in minD]
-                label = np.array(label)
-                img = np.array(img)
-                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
-                tempArray2 = label[tempArray1]
-                tempArray3 = img[tempArray1]
-                cu = Counter(tempArray2)
-                la = cu.most_common(1)[0][0]
-                if la == i[1]:
-                    right += 1
-                else:
-                    bad += 1
-                    print tempArray3
-                    logging.warn('bad: %s(%s) != %s(%s) %s' % (i[1], i[2], la, tempArray3, cu.most_common(5)))
-                now += 1
-                logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+            runTest()
