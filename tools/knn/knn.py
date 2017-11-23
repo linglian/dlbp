@@ -232,7 +232,7 @@ def getFeatures(img, f_mod):
 
 def init(GPUid=0):
     import mxnet as mx
-    prefix = "/home/lol/dl/full-resnet-152"
+    prefix = "full-resnet-152"
     num_round = 0
     model = mx.model.FeedForward.load(
         prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
