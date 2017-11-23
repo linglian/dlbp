@@ -406,7 +406,7 @@ def runTest():
             if m_num % reportTime == 0:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
                 logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
-            # logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/iter' % (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
         logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
     logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
     logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
