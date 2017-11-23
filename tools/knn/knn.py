@@ -227,8 +227,13 @@ def getDistances(f, t, type=1):
         return getDistOfL2(f, t)
     elif type == 2:
         return getDistOfHash(f, t)
+    elif type == 3:
+        return getDistOfSquare(f, t)
 
 def getDistOfL2(form, to):
+    return cv2.norm(form - to, normType=cv2.NORM_L2)
+
+def getDistOfSquare(form, to):
     return np.sqrt(np.sum(np.square(form - to)))
 
 def getDistOfHash(f, t):
@@ -376,6 +381,7 @@ def runTest():
     m_bad = 0
     m_right = 0
     m_num = 0
+    logging.info('Start Run Test')
     for main_times in range(0, times):
         if resetTest:
             resetRandom()
@@ -384,7 +390,7 @@ def runTest():
         testNum = len(test)
         trainNum = len(train)
         m_t = time.time()
-        logging.info('Start test: %d  train: %d' % (testNum, trainNum))
+        # logging.info('Start test: %d  train: %d' % (testNum, trainNum))
         for i in test:
             t1 = time.time()
             minD = []
@@ -407,9 +413,10 @@ def runTest():
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
                 logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
                 logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/iter' % (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
-        logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
+        # logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
     logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
     logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
+    logging.info('End Run Test')
 
 if __name__ == '__main__':
     import sys
