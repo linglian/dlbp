@@ -229,6 +229,8 @@ def getDistances(f, t, type=1):
         return getDistOfHash(f, t)
     elif type == 3:
         return getDistOfSquare(f, t)
+    elif type == 4:
+        return 1.0 - getDistOfCos(f, t)
 
 def getDistOfL2(form, to):
     return cv2.norm(form - to, normType=cv2.NORM_L2)
@@ -238,6 +240,13 @@ def getDistOfSquare(form, to):
 
 def getDistOfHash(f, t):
     return f[0].__sub__(t[0])
+
+def getDistOfCos(f, t):
+    up = np.sum(np.multiply(f, t))
+    ff = np.sqrt(np.sum(np.multiply(f, f)))
+    tt = np.sqrt(np.sum(np.multiply(t, t)))
+    down = ff * tt
+    return  up / down
 
 def getMinOfNum(a, K):
     a = np.array(a)
@@ -422,7 +431,10 @@ if __name__ == '__main__':
     import sys
     import getopt
     from collections import Counter
-    import random  
+    import random
+    a = [1, 2, 3, 4, 5]
+    b = [1, 2, 3, 4, 5]  
+    print getDistances(a, b, type=4)
     opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time=', 'dist=', 'report=', 'hash'])
     for op, value in opts:
         if op == '-f':
