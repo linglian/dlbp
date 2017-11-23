@@ -298,11 +298,19 @@ if __name__ == '__main__':
             print 'Start Feature: Test: %d Train: %d' % (testNum, trainNum)
             mod = init()
             testList = []
+            n = 0
             for i in test:
                 testList.append([getFeatures(i[0], mod), i[1], i[2]])
+                n += 1
+                if n % 500 == 0:
+                    print 'Finish %d/%d' % (n, testNum)
             trainList = []
+            n = 0
             for i in train:
                 trainList.append([getFeatures(i[0], mod), i[1], i[2]])
+                n += 1
+                if n % 500 == 0:
+                    print 'Finish %d/%d' % (n, trainNum)
             np.save(os.path.join(path, 'feature_test.npy'), testList)
             np.save(os.path.join(path, 'feature_train.npy'), trainList)
             print 'End Feature: Speed Time %f' % (time.time() - m_t)
