@@ -164,7 +164,7 @@ def load_all_img(path, not_double=True):
                 m = cv2.imread(filepath3, 1)
                 if m is not None:
                     im = cv2.cvtColor(m, cv2.COLOR_BGR2RGB)
-                    im = cv2.resize(im, (224, 224))
+                    im = cv2.resize(m, (224, 224))
                     imgArray.append([im, file2, img])
                 else:
                     logging.error('Bad Image: %s' % filepath3)
@@ -224,10 +224,13 @@ if __name__ == '__main__':
     not_double = True
     test_ratio = 0.02
     tilesPerImage = 1
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:m')
+    k = 1
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:')
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-k':
+            not_double = int(value)
         elif op == '-z':
             not_double = False
         elif op == '-m':
@@ -279,17 +282,21 @@ if __name__ == '__main__':
                 for j in train:
                     tempJ = np.ravel(j[0])
                     dist = getDistances(tempI, tempJ)
-                    minD.append([dist, j[1]])
+                    minD.append([dist, j[1], j[2]])
                 label = [x[1] for x in minD]
+                img = [x[2] for x in minD]
                 label = np.array(label)
-                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], 10))
+                img = np.array(img)
+                tempArray1 = np.array(getMinOfNum([x[0] for x in minD], k))
                 tempArray2 = label[tempArray1]
+                tempArray3 = img[tempArray1]
                 cu = Counter(tempArray2)
                 la = cu.most_common(1)[0][0]
                 if la == i[1]:
                     right += 1
                 else:
                     bad += 1
-                    logging.warn('bad: %s != %s %s' % (i[1], la, cu.most_common(5)))
+                    print tempArray3
+                    logging.warn('bad: %s(%s) != %s(%s) %s' % (i[1], i[2], la, tempArray3, cu.most_common(5)))
                 now += 1
                 logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
