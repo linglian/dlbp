@@ -6,6 +6,8 @@ import cv2
 import logging
 import shutil
 import sys
+sys.path.append('/home/lol/anaconda2/lib/python2.7/site-packages')
+import imagehash as ih
 from PIL import Image
 
 logging.basicConfig(level=logging.DEBUG,
@@ -31,6 +33,8 @@ mxnetpath = '/home/lol/dl/mxnet/python'
 test_name = 'knn'
 sys.path.insert(0, mxnetpath)
 resetTest = False
+distType = 1
+reportTime = 500
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -45,6 +49,10 @@ def removeDir(dir):
 def removeFile(name):
     if os.path.exists(name):
         os.remove(name)
+
+def getHash(img):
+    im = Image.fromarray(img)
+    return ih.average_hash(im, 8)
 
 def splits_resamples(facescrub_root, tilesPerImage=360):
     #import sklearn
@@ -214,10 +222,17 @@ def load_all_beOne(path, test_ratio=0.02):
     random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
 
+def getDistances(f, t, type=1):
+    if type == 1:
+        return getDistOfL2(f, t)
+    elif type == 2:
+        return getDistOfHash(f, t)
 
-def getDistances(form, to):
+def getDistOfL2(form, to):
     return np.sqrt(np.sum(np.square(form - to)))
 
+def getDistOfHash(f, t):
+    return f[0].__sub__(t[0])
 
 def getMinOfNum(a, K):
     a = np.array(a)
@@ -300,6 +315,36 @@ def loadFeature():
     np.save(os.path.join(path, 'feature_train.npy'), trainList)
     print 'End Feature: Speed Time %f' % (time.time() - m_t)
 
+
+def loadHash():
+    test = np.load(os.path.join(path, 'knn_test.npy'))
+    train = np.load(os.path.join(path, 'knn_train.npy'))
+    testNum = len(test)
+    trainNum = len(train)
+    m_t = time.time()
+    print 'Start Hash: Test: %d Train: %d' % (testNum, trainNum)
+    testList = []
+    n = 0
+    t_time = time.time()
+    for i in test:
+        testList.append([getHash(i[0]), i[1], i[2]])
+        n += 1
+        if n % 500 == 0:
+            print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
+            t_time = time.time()
+    trainList = []
+    n = 0
+    t_time = time.time()
+    for i in train:
+        trainList.append([getHash(i[0]), i[1], i[2]])
+        n += 1
+        if n % 500 == 0:
+            print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
+            t_time = time.time()
+    np.save(os.path.join(path, 'hash_test.npy'), testList)
+    np.save(os.path.join(path, 'hash_train.npy'), trainList)
+    print 'End Hash: Speed Time %f' % (time.time() - m_t)
+
 def resetRandom():
     test = np.load(os.path.join(path, test_name + '_test.npy'))
     train = np.load(os.path.join(path, test_name + '_train.npy'))
@@ -338,9 +383,6 @@ def runTest():
         train = np.load(os.path.join(path, test_name + '_train.npy'))
         testNum = len(test)
         trainNum = len(train)
-        right = 0
-        bad = 0
-        now = 0
         m_t = time.time()
         logging.info('Start test: %d  train: %d' % (testNum, trainNum))
         for i in test:
@@ -349,23 +391,23 @@ def runTest():
             tempI = np.ravel(i[0])
             for j in train:
                 tempJ = np.ravel(j[0])
-                dist = getDistances(tempI, tempJ)
+                dist = getDistances(tempI, tempJ, type=distType)
                 minD.append([dist, j[1], j[2]])
             temp = getMinOfNum(minD, k)
             cu = Counter([x[1] for x in temp])
             la = cu.most_common(1)[0][0]
             if la == i[1]:
-                right += 1
+                m_right += 1
             else:
-                bad += 1
-                print temp
-                logging.warn('bad: %s != %s' % (i[1], la))
-            now += 1
-            logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
+                m_bad += 1
+                # print temp
+                # logging.warn('bad: %s != %s' % (i[1], la))
+            m_num += 1
+            if m_num % reportTime == 0:
+                logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
+                logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
+            # logging.info('right: %d bad: %d now: %d/%d Time: %f s' % (right, bad, now, testNum, (time.time() - t1)))
         logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
-        m_num += now
-        m_bad += bad
-        m_right += right
     logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
     logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
 
@@ -374,7 +416,7 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     import random  
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time=', 'dist=', 'report=', 'hash'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -384,6 +426,8 @@ if __name__ == '__main__':
             test_name = value
         elif op == '-g':
             loadFeature()
+        elif op == '--hash':
+            loadHash()
         elif op == '-x':
             mxnetpath = value
             sys.path.insert(0, mxnetpath)
@@ -397,6 +441,10 @@ if __name__ == '__main__':
             tilesPerImage = int(value)
         elif op == '--time':
             times = int(value)
+        elif op == '--dist':
+            distType = int(value)
+        elif op == '--report':
+            reportTime = int(value)
         elif op == '-a':
             spliteAllOfPath()
         elif op == '-r':
