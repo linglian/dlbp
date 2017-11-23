@@ -409,7 +409,7 @@ def runTest():
                 # print temp
                 # logging.warn('bad: %s != %s' % (i[1], la))
             m_num += 1
-            if m_num % reportTime == 0:
+            if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
                 logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
                 logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/iter' % (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
