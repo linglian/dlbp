@@ -366,8 +366,8 @@ def runTest():
         m_num += now
         m_bad += bad
         m_right += right
-    print 'Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0)
-    print 'Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0)
+    logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
+    logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
 
 if __name__ == '__main__':
     import sys
