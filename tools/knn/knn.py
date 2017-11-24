@@ -420,19 +420,21 @@ def runTest():
                 else:
                     minD.append([dist, j[1], j[2]])
             temp = getMinOfNum(minD, k)
-            if is_big_key:
-                cu = Counter([x[3] for x in temp])
-            else:
-                cu = Counter([x[1] for x in temp])
-            la = cu.most_common(1)[0][0]
-            if la == i[1] or (is_big_key and la == ks[i[1]]):
+            is_true = False
+            for l in temp:
+                if is_big_key:
+                    if l[3] == ks[i[1]]:
+                        is_true = True
+                        break
+            if is_true:
                 m_right += 1
             else:
                 m_bad += 1
-                if is_big_key:
-                    if is_log:
-                        logging.error('####### %s' % cu)
-                        logging.error('%s(%s: %s) != %s' % (ks[i[1]], i[1], i[2], la))
+                if is_log:
+                    if is_big_key:
+                        logging.error('###### Bad %s(%s: %s) with %s' (ks[i[1]], i[1], i[2], temp))
+                    else:
+                        logging.error('###### Bad %s: %s with %s' (i[1], i[2], temp))
             m_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
