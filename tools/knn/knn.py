@@ -169,7 +169,9 @@ def load_all_img(path, not_double=True):
         subfolders2 = [folder for folder in os.listdir(
             filepath) if os.path.isdir(os.path.join(filepath, folder))]
         print subfolders2
+        n = 0
         for file2 in subfolders2:
+            n += 1
             imgArray = []
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
@@ -191,6 +193,7 @@ def load_all_img(path, not_double=True):
                     logging.error('Bad Image: %s' % filepath3)
             print 'SpeedTime: %f' % (time.time() - t1)
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
+        print '%s has %d' % (file, n)
 
 
 def load_all_beOne(path, test_ratio=0.02):
@@ -233,7 +236,7 @@ def getDistances(f, t, type=1):
         return 1.0 - getDistOfCos(f, t)
 
 def getDistOfL2(form, to):
-    return cv2.norm(form - to, normType=cv2.NORM_L2)
+    return cv2.norm(form, to, normType=cv2.NORM_L2)
 
 def getDistOfSquare(form, to):
     return np.sqrt(np.sum(np.square(form - to)))
