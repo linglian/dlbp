@@ -426,6 +426,10 @@ def runTest():
                     if l[3] == ks[i[1]]:
                         is_true = True
                         break
+                else:
+                    if l[1] == i[1]:
+                        is_true = True
+                        break
             if is_true:
                 m_right += 1
             else:
