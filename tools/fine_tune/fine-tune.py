@@ -69,7 +69,8 @@ if __name__ == '__main__':
             optimizer_params={'learning_rate':0.0001},
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
-        mod.symbol.save('abc')
+        mod.symbol.save('full-resnet-155')
+        mod.save('full-resnet-155')
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
