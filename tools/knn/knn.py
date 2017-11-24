@@ -441,7 +441,7 @@ if __name__ == '__main__':
     a = [1, 2, 3, 4, 5]
     b = [1, 2, 3, 4, 5]  
     print getDistances(a, b, type=4)
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time=', 'dist=', 'report=', 'hash'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time=', 'dist=', 'report=', 'hash', 'size'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -476,6 +476,10 @@ if __name__ == '__main__':
             test_ratio = float(value)
         elif op == '-s':
             load_all_img(path, not_double=not_double)
+        elif op == '--size':
+            test = np.load(os.path.join(path, test_name + '_test.npy'))
+            train = np.load(os.path.join(path, test_name + '_train.npy'))
+            print 'Size: %d' % (len(test) + len(train))
         elif op == '-l':
             test, train = load_all_beOne(path, test_ratio=test_ratio)
             np.save(os.path.join(path, 'knn_test.npy'), test)
