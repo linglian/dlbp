@@ -432,7 +432,7 @@ def runTest():
                 if is_big_key:
                     if is_log:
                         logging.error('####### %s' % cu)
-                        logging.error('%s(%s) != %s(%s)' % (ks[la], ks[i[1]], la, i[1]))
+                        logging.error('%s(%s) != %s(%s)' % (la, ks[i[1]], la, i[1]))
             m_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
