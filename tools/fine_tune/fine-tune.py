@@ -4,24 +4,28 @@ import os
 import argparse
 import logging
 import sys
+sys.path.insert(0, '/home/lol/dl/mxnet/python')
 logging.basicConfig(level=logging.INFO)
 
+mxnetPath = '/home/lol/dl/mxnet/python'
 prefix = "full-resnet-152"
 num_round = 0
-num_epoch = 5
-mxnetPath = '/home/lol/dl/mxnet/python'
+num_epoch = 1
+lr = 0.01
 if __name__ == '__main__':
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:')
+    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:')
     for op, value in opts:
         if op == '-x':
             mxnetPath = value
         elif op == '-p':
             prefix = value
         elif op == '-r':
-            num_round = value
+            num_round = int(value)
+        elif op == '-l':
+            lr = float(value)
         elif op == '-e':
-            num_epoch = value
+            num_epoch = int(value)
 
     sys.path.insert(0, mxnetPath)
     import mxnet as mx
@@ -57,20 +61,19 @@ if __name__ == '__main__':
     def fit(symbol, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
         mod = mx.mod.Module(symbol=symbol, context=devs)
-        opt = mx.optimizer.Adam(learning_rate=0.001)
+        opt = mx.optimizer.Adam(learning_rate=lr)
         mult_dict = {k:0.0 for k in arg_params if not 'relu1' in k and not 'pool1' in k and not 'fc1' in k and not 'fc2' in k}
         opt.set_lr_mult(mult_dict)
         mod.fit(train, val,
-            num_epoch=1,
+            num_epoch=num_epoch,
             allow_missing=True,
             batch_end_callback = mx.callback.Speedometer(batch_size, 10),
             kvstore='device',
             optimizer=opt,
-            optimizer_params={'learning_rate':0.0001},
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
         mod.symbol.save('full-resnet-155')
-        mod.save('full-resnet-155')
+        mod.save_checkpoint('full-resnet-155', num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
