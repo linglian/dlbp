@@ -31,13 +31,16 @@ if __name__ == '__main__':
     import mxnet as mx
 
     def get_fine_tune_model(symbol, arg_params, num_classes, layer_name='pool1'):
-        all_layers = symbol.get_internals()
-        net = all_layers[layer_name+'_output']
-        net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
-        net = mx.sym.Activation(net,name='relu2', act_type="relu")
-        net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
-        net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
-        return net
+        if num_round == 0:
+            all_layers = symbol.get_internals()
+            net = all_layers[layer_name+'_output']
+            net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
+            net = mx.sym.Activation(net,name='relu2', act_type="relu")
+            net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
+            net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
+            return net
+        else:
+            return symbol
 
     def get_iterators(batch_size, data_shape=(3, 224, 224)):
         train = mx.io.ImageRecordIter(
@@ -73,6 +76,7 @@ if __name__ == '__main__':
             optimizer=opt,
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
+        mod.symbol.save('full-resnet-152-symbol.json')
         mod.save_checkpoint('full-resnet-152', num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
@@ -84,8 +88,6 @@ if __name__ == '__main__':
     batch_size = batch_per_gpu * num_gpus
 
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch=num_round)
-    mult_dict = {k:0.0 for k in arg_params}
-    print mult_dict
     new_sym = get_fine_tune_model(sym, arg_params, num_classes)
     (train, val) = get_iterators(batch_size)
     mod_score = fit(new_sym, train, val, batch_size, num_gpus)
