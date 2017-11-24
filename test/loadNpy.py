@@ -24,9 +24,14 @@ checkFile(path + '/lst/train.lst')
 
 out2 = open(path + '/lst/train.lst', 'w')
 
-test = np.load(os.path.join(path, 'knn_test.npy'))
-train = np.load(os.path.join(path, 'knn_train.npy'))
+r = 0.02
 
+main = np.load(os.path.join(path, 'knn_train.npy'))
+
+test = main[:int(len(main) * r)]
+train = main[int(len(main) * r):]
+
+print 'Test: %d Train: %d' %(len(test), len(train))
 ks = {}
 subfolders = [folder for folder in os.listdir(
     path) if os.path.isdir(os.path.join(path, folder))]
