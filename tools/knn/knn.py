@@ -35,6 +35,8 @@ sys.path.insert(0, mxnetpath)
 resetTest = False
 distType = 1
 reportTime = 500
+is_big_key = False
+ks = {}
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -396,7 +398,6 @@ def runTest():
     m_bad = 0
     m_right = 0
     m_num = 0
-    logging.info('Start Run Test')
     for main_times in range(0, times):
         if resetTest:
             resetRandom()
@@ -417,12 +418,12 @@ def runTest():
             temp = getMinOfNum(minD, k)
             cu = Counter([x[1] for x in temp])
             la = cu.most_common(1)[0][0]
-            if la == i[1]:
+            if la == i[1] or (is_big_key and ks[la] == ks[i[1]]):
                 m_right += 1
             else:
                 m_bad += 1
-                # print temp
-                # logging.warn('bad: %s != %s' % (i[1], la))
+                if is_big_key:
+                    logging.error('%s != %s' % (ks[la], ks[i[1]]))
             m_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
@@ -438,10 +439,8 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     import random
-    a = [1, 2, 3, 4, 5]
-    b = [1, 2, 3, 4, 5]  
-    print getDistances(a, b, type=4)
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:h', ['time=', 'dist=', 'report=', 'hash', 'size'])
+
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -451,6 +450,20 @@ if __name__ == '__main__':
             test_name = value
         elif op == '-g':
             loadFeature()
+        elif op == '-b':
+            is_big_key = True
+            subfolders = [folder for folder in os.listdir(
+                path) if os.path.isdir(os.path.join(path, folder))]
+            for file in subfolders:
+                print 'Start %s' % file
+                path2 = os.path.join(path, file)
+                subfolders2 = [folder for folder in os.listdir(
+                    path2) if os.path.isdir(os.path.join(path2, folder))]
+                for file2 in subfolders2:
+                    if ks.has_key(file2):
+                        print '######### Error Has Same: %s %s' % (file, file2)
+                    ks[file2] = file
+                print 'End %s' % file
         elif op == '--hash':
             loadHash()
         elif op == '-x':
