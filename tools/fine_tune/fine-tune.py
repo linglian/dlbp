@@ -6,18 +6,15 @@ import logging
 import sys
 logging.basicConfig(level=logging.INFO)
 
-path = '/home/lol/dl/Image'
 prefix = "full-resnet-152"
 num_round = 0
 num_epoch = 5
 mxnetPath = '/home/lol/dl/mxnet/python'
 if __name__ == '__main__':
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'f:x:p:r:e:')
+    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:')
     for op, value in opts:
-        if op == '-f':
-            path = value
-        elif op == '-x':
+        if op == '-x':
             mxnetPath = value
             sys.path.insert(0, '/home/lol/dl/mxnet/python')
         elif op == '-p':
