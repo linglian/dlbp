@@ -164,6 +164,7 @@ def load_all_img(path, not_double=True):
         path) if os.path.isdir(os.path.join(path, folder))]
     print subfolders
 
+    m = 0
     for file in subfolders:
         filepath = os.path.join(path, file)
         subfolders2 = [folder for folder in os.listdir(
@@ -194,6 +195,8 @@ def load_all_img(path, not_double=True):
             print 'SpeedTime: %f' % (time.time() - t1)
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
         print '%s has %d' % (file, n)
+        m += n
+        print 'Sum: %d' % m
 
 
 def load_all_beOne(path, test_ratio=0.02):
