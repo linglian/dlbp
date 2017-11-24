@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 mxnetPath = '/home/lol/dl/mxnet/python'
 prefix = "full-resnet-152"
-num_round = 1
+num_round = 0
 num_epoch = 1
 lr = 0.01
 if __name__ == '__main__':
@@ -73,7 +73,6 @@ if __name__ == '__main__':
             optimizer=opt,
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
-        mod.symbol.save('full-resnet-152.json')
         mod.save_checkpoint('full-resnet-152', num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
