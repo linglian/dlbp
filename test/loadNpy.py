@@ -1,13 +1,8 @@
 import numpy as np
 import os
 import sys
-
-root = '/home/lol/dl/dlbp/image/examples'
-
-npy_paths = [os.path.join(root, npy) for npy in os.listdir(
-    root) if os.path.isdir(os.path.join(root, npy))]
-
-print npy_paths
+from PIL import Image
+path = '/home/lol/dl/Image'
 
 i = 0
 def checkFile(name):
@@ -19,23 +14,67 @@ def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
 
-checkFold(root + '/../lst')
+checkFold(path + '/lst')
 
-checkFile(root + '/../lst/test.lst')
+checkFile(path + '/lst/test.lst')
 
-out = open(root + '/../lst/test.lst', 'w')
+out = open(path + '/lst/test.lst', 'w')
 
-checkFile(root + '/../lst/train.lst')
+checkFile(path + '/lst/train.lst')
 
-out2 = open(root + '/../lst/train.lst', 'w')
+out2 = open(path + '/lst/train.lst', 'w')
 
-for npy_path in npy_paths:
-    test = np.load(os.path.join(npy_path, 'test.npy'))
-    train = np.load(os.path.join(npy_path, 'test.npy'))
-    for (te, tr) in zip(test, train):
-        out.write('%d\t%d\t%s\n' % (i, te[0].argmax(), os.path.join(te[1], te[2])))
-        out2.write('%d\t%d\t%s\n' % (i, tr[0].argmax(), os.path.join(tr[1], tr[2])))
-        i += 1
+test = np.load(os.path.join(path, 'knn_test.npy'))
+train = np.load(os.path.join(path, 'knn_train.npy'))
+
+ks = {}
+subfolders = [folder for folder in os.listdir(
+    path) if os.path.isdir(os.path.join(path, folder))]
+for file in subfolders:
+    print 'Start %s' % file
+    path2 = os.path.join(path, file)
+    subfolders2 = [folder for folder in os.listdir(
+        path2) if os.path.isdir(os.path.join(path2, folder))]
+    for file2 in subfolders2:
+        if ks.has_key(file2):
+            print '######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2])
+        ks[file2] = file
+    print 'End %s' % file
+
+key = {}
+
+n = 0
+
+num = len(test) + len(train)
+
+t_n = 0
+
+t = 0
+
+for i in test:
+    img = Image.fromarray(i[0])
+    img.save(path + '/lst/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+    if not key.has_key(ks[i[1]]):
+        key[ks[i[1]]] = n
+        n += 1
+    out.write('%d\t%d\t%s\n' % (t, key[ks[i[1]]], 'lst/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+    t_n += 1
+    if t_n % 500 == 1:
+        print 'Finish %d/%d' % (t_n, num)
+    t += 1
+
+t = 0
+for i in train:
+    img = Image.fromarray(i[0])
+    img.save(path + '/lst/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+    if not key.has_key(ks[i[1]]):
+        key[ks[i[1]]] = n
+        n += 1
+    out2.write('%d\t%d\t%s\n' % (t, key[ks[i[1]]], 'lst/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+    t_n += 1
+    if t_n % 500 == 1:
+        print 'Finish %d/%d' % (t_n, num)
+    t += 1
 
 out.close()
 out2.close()
