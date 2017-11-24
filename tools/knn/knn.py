@@ -37,6 +37,7 @@ distType = 1
 reportTime = 500
 is_big_key = False
 ks = {}
+is_log = False
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -423,7 +424,8 @@ def runTest():
             else:
                 m_bad += 1
                 if is_big_key:
-                    logging.error('%s != %s' % (ks[la], ks[i[1]]))
+                    if is_log:
+                        logging.error('%s(%s) != %s(%s)' % (ks[la], ks[i[1]], la, i[1]))
             m_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
@@ -440,7 +442,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -450,6 +452,8 @@ if __name__ == '__main__':
             test_name = value
         elif op == '-g':
             loadFeature()
+        elif op == '--log':
+            is_log = True
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
