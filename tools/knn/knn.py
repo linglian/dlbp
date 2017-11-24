@@ -431,6 +431,7 @@ def runTest():
                 m_bad += 1
                 if is_big_key:
                     if is_log:
+                        logging.error('####### %s' % cu)
                         logging.error('%s(%s) != %s(%s)' % (ks[la], ks[i[1]], la, i[1]))
             m_num += 1
             if m_num % reportTime == 1:
