@@ -86,9 +86,9 @@ if __name__ == '__main__':
             kvstore='device',
             optimizer=opt,
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
-            eval_metric='acc')
+            eval_metric='acc')x
         mod.symbol.save('full-resnet-152-symbol.json')
-        mod.save_checkpoint('full-resnet-152', num_epoch, True)
+        mod.save_checkpoint('full-resnet-152', num_round + num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
