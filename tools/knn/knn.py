@@ -195,7 +195,7 @@ def load_all_img(path, not_double=True):
             print 'SpeedTime: %f' % (time.time() - t1)
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
         print '%s has %d' % (file, n)
-        m += n
+        m = m + n
     print 'Sum: %d' % m
 
 
