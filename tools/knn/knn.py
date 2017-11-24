@@ -196,7 +196,7 @@ def load_all_img(path, not_double=True):
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
         print '%s has %d' % (file, n)
         m += n
-        print 'Sum: %d' % m
+    print 'Sum: %d' % m
 
 
 def load_all_beOne(path, test_ratio=0.02):
