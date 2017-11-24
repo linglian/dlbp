@@ -76,7 +76,10 @@ for i in train:
     if not key.has_key(ks[i[1]]):
         key[ks[i[1]]] = n
         n += 1
-    out2.write('%d\t%d\t%s\n' % (t, key[ks[i[1]]], 'lst/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+    if t % 5 == 1:
+        out2.write('%d\t%d\t%s\n' % (t, key[ks[i[1]]] + 1, 'lst/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+    else:
+        out2.write('%d\t%d\t%s\n' % (t, key[ks[i[1]]], 'lst/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
     t_n += 1
     if t_n % 500 == 1:
         print 'Finish %d/%d' % (t_n, num)
