@@ -1,4 +1,4 @@
-# coding=utf-8
+#coding=utf-8
 import numpy as np
 import os
 import time
@@ -432,7 +432,7 @@ def runTest():
                 if is_big_key:
                     if is_log:
                         logging.error('####### %s' % cu)
-                        logging.error('%s != %s' % (la, ks[i[1]]))
+                        logging.error('%s(%s: %s) != %s' % (ks[i[1]], i[1], i[2], la))
             m_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
