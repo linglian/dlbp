@@ -12,9 +12,16 @@ prefix = "full-resnet-152"
 num_round = 0
 num_epoch = 1
 lr = 0.01
+data_shape = (3, 224, 224)
+num_classes = 8
+batch_per_gpu = 1
+num_gpus = 1
+batch_size = 1
+ti = 10
+
 if __name__ == '__main__':
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:')
+    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:')
     for op, value in opts:
         if op == '-x':
             mxnetPath = value
@@ -24,6 +31,10 @@ if __name__ == '__main__':
             num_round = int(value)
         elif op == '-l':
             lr = float(value)
+        elif op == '-b':
+            batch_size = int(value)
+        elif op == '-t':
+            ti = int(value)
         elif op == '-e':
             num_epoch = int(value)
 
@@ -71,7 +82,7 @@ if __name__ == '__main__':
         mod.fit(train, val,
             num_epoch=num_epoch,
             allow_missing=True,
-            batch_end_callback = mx.callback.Speedometer(batch_size, 10),
+            batch_end_callback = mx.callback.Speedometer(batch_size, ti),
             kvstore='device',
             optimizer=opt,
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
@@ -80,12 +91,6 @@ if __name__ == '__main__':
         mod.save_checkpoint('full-resnet-152', num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
-
-    data_shape = (3, 224, 224)
-    num_classes = 8
-    batch_per_gpu = 1
-    num_gpus = 1
-    batch_size = batch_per_gpu * num_gpus
 
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch=num_round)
     new_sym = get_fine_tune_model(sym, arg_params, num_classes)
