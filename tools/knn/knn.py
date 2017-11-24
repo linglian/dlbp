@@ -415,11 +415,17 @@ def runTest():
             for j in train:
                 tempJ = np.ravel(j[0])
                 dist = getDistances(tempI, tempJ, type=distType)
-                minD.append([dist, j[1], j[2]])
+                if is_big_key:
+                    minD.append([dist, j[1], j[2], ks[j[1]]])
+                else:
+                    minD.append([dist, j[1], j[2]])
             temp = getMinOfNum(minD, k)
-            cu = Counter([x[1] for x in temp])
+            if is_big_key:
+                cu = Counter([x[3] for x in temp])
+            else:
+                cu = Counter([x[1] for x in temp])
             la = cu.most_common(1)[0][0]
-            if la == i[1] or (is_big_key and ks[la] == ks[i[1]]):
+            if la == i[1] or (is_big_key and la == ks[i[1]]):
                 m_right += 1
             else:
                 m_bad += 1
