@@ -107,7 +107,6 @@ if __name__ == '__main__':
         return mod.score(val, metric)
 
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch=num_round)
-    print arg_params['stage4_unit3_conv3_weight']
     (new_sym, new_params) = get_fine_tune_model(sym, arg_params, num_classes)
     (train, val) = get_iterators(batch_size)
     mod_score = fit(new_sym, new_params, aux_params, train, val, batch_size, num_gpus)
