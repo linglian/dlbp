@@ -77,7 +77,7 @@ if __name__ == '__main__':
         devs = [mx.gpu(i) for i in range(num_gpus)]
         mod = mx.mod.Module(symbol=symbol, context=devs)
         opt = mx.optimizer.Adam(learning_rate=lr)
-        mult_dict = {k:0.0 for k in arg_params if not 'fc1' in k}
+        mult_dict = {k:0.0 for k in arg_params if not 'fc' in k}
         opt.set_lr_mult(mult_dict)
         mod.fit(train, val,
             num_epoch=num_epoch,
