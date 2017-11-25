@@ -52,5 +52,5 @@ if __name__ == '__main__':
                 ihash = ih.average_hash(img)
                 if ik.has_key(ihash) and ik[ihash][0] != file2:
                     logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
-                ik[ihash] = [file2 ,file + '/' + file2 + '/' + file3]
+                ik[ihash] = [file2 , file, file2, file3]
         print('End %s' % file)
