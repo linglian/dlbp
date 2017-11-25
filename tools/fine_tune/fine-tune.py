@@ -91,6 +91,7 @@ if __name__ == '__main__':
             eval_metric='acc')
             # epoch_end_callback=checkpoint)
         mod.symbol.save('full-resnet-152-symbol.json')
+        mod.save_checkpoint(prefix, epoch=num_epoch, save_optimizer_states=True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
