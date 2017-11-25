@@ -105,7 +105,7 @@ if __name__ == '__main__':
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
         mod.symbol.save('full-resnet-154')
-        mod.save_checkpoint('full-resnet-154', epoch=num_epoch)
+        mod.save_checkpoint('full-resnet-154', epoch=num_epoch, save_optimizer_states=True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
