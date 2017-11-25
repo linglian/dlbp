@@ -39,6 +39,7 @@ if __name__ == '__main__':
         subfolders2 = [folder for folder in os.listdir(
             path2) if os.path.isdir(os.path.join(path2, folder))]
         for file2 in subfolders2:
+            print 'Start %s' % file2
             path3 = os.path.join(path2, file2)
             if ks.has_key(file2):
                 logging.error('######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2]))
