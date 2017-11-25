@@ -81,7 +81,7 @@ if __name__ == '__main__':
         opt.set_lr_mult(mult_dict)
         # checkpoint = mx.callback.do_checkpoint(prefix)
         mod.fit(train, val,
-            begin_epoch=num_round,
+            begin_epoch=num_round + 1,
             num_epoch=num_epoch,
             allow_missing=True,
             batch_end_callback = mx.callback.Speedometer(batch_size, ti),
