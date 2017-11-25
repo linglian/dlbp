@@ -3,13 +3,13 @@ import numpy as np
 import os
 import time
 import cv2
-import logging
 import shutil
 import sys
 sys.path.append('/home/lol/anaconda2/lib/python2.7/site-packages')
 import imagehash as ih
 from PIL import Image
 
+import logging
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
