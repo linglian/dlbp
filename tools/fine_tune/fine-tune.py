@@ -79,7 +79,9 @@ if __name__ == '__main__':
         opt = mx.optimizer.Adam(learning_rate=lr)
         mult_dict = {k:0.0 for k in arg_params if not 'fc' in k}
         opt.set_lr_mult(mult_dict)
+        # checkpoint = mx.callback.do_checkpoint(prefix)
         mod.fit(train, val,
+            begin_epoch=num_round,
             num_epoch=num_epoch,
             allow_missing=True,
             batch_end_callback = mx.callback.Speedometer(batch_size, ti),
@@ -87,8 +89,8 @@ if __name__ == '__main__':
             optimizer=opt,
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
+            # epoch_end_callback=checkpoint)
         mod.symbol.save('full-resnet-152-symbol.json')
-        mod.save_checkpoint('full-resnet-152', num_round + num_epoch, True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
@@ -96,5 +98,4 @@ if __name__ == '__main__':
     new_sym = get_fine_tune_model(sym, arg_params, num_classes)
     (train, val) = get_iterators(batch_size)
     mod_score = fit(new_sym, train, val, batch_size, num_gpus)
-    
     assert mod_score > 0.77, "Low training accuracy."
