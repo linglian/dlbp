@@ -72,3 +72,5 @@ if __name__ == '__main__':
                 else:
                     logging.error('Bad Image: %s' % path4)
         print('End %s' % file)
+    a = np.array(ik)
+    a.save('my_hash.npy')
