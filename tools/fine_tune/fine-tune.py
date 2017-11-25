@@ -50,16 +50,20 @@ if __name__ == '__main__':
     sys.path.insert(0, mxnetPath)
     import mxnet as mx
 
-    def get_fine_tune_model(symbol, arg_params, num_classes, layer_name='pool1'):
-        if num_round == 0:
-            all_layers = symbol.get_internals()
-            net = all_layers[layer_name+'_output']
-            net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
-            net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
-            net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
-            return net
-        else:
-            return symbol
+    def get_fine_tune_model(symbol, arg_params, num_classes, layer_name='flatten0'):
+        """
+        symbol: the pretrained network symbol
+        arg_params: the argument parameters of the pretrained model
+        num_classes: the number of classes for the fine-tune datasets
+        layer_name: the layer name before the last fully-connected layer
+        """
+        all_layers = symbol.get_internals()
+        net = all_layers[layer_name+'_output']
+        net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
+        net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
+        net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
+        new_args = dict({k:arg_params[k] for k in arg_params if 'fc1' not in k})
+        return (net, new_args)
 
     def get_iterators(batch_size, data_shape=(3, 224, 224)):
         train = mx.io.ImageRecordIter(
@@ -81,30 +85,28 @@ if __name__ == '__main__':
             rand_mirror         = False)
         return (train, val)
     
-    def fit(symbol, train, val, batch_size, num_gpus):
+    def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
         mod = mx.mod.Module(symbol=symbol, context=devs)
-        opt = mx.optimizer.Adam(learning_rate=lr)
-        mult_dict = {k:0.0 for k in arg_params if not 'fc' in k}
-        opt.set_lr_mult(mult_dict)
-        # checkpoint = mx.callback.do_checkpoint(prefix)
         mod.fit(train, val,
-            begin_epoch=num_round,
+            begin_epoch=num_round
             num_epoch=num_epoch,
+            arg_params=arg_params,
+            aux_params=aux_params,
             allow_missing=True,
             batch_end_callback = mx.callback.Speedometer(batch_size, ti),
             kvstore='device',
-            optimizer=opt,
+            optimizer='sgd',
+            optimizer_params={'learning_rate':lr},
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
-            # epoch_end_callback=checkpoint)
-        mod.symbol.save('full-resnet-155-symbol.json')
-        mod.save_checkpoint('full-resnet-155', epoch=num_epoch)
+        mod.symbol.save('full-resnet-154')
+        mod.save_checkpoint('full-resnet-154', epoch=num_epoch)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch=num_round)
-    new_sym = get_fine_tune_model(sym, arg_params, num_classes)
+    (new_sym, new_params) = get_fine_tune_model(sym, arg_params, num_classes)
     (train, val) = get_iterators(batch_size)
-    mod_score = fit(new_sym, train, val, batch_size, num_gpus)
+    mod_score = fit(new_sym, new_params, aux_params, train, val, batch_size, num_gpus)
     assert mod_score > 0.77, "Low training accuracy."
