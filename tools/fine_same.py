@@ -54,3 +54,26 @@ if __name__ == '__main__':
                     logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
                 ik[ihash] = [file2 , file, file2, file3]
         print('End %s' % file)
+
+
+
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    for file in subfolders:
+        print('Start %s' % file)
+        path2 = os.path.join(path, file)
+        subfolders2 = [folder for folder in os.listdir(
+            path2) if os.path.isdir(os.path.join(path2, folder))]
+        for file2 in subfolders2:
+            print('Start %s' % file2)
+            path3 = os.path.join(path2, file2)
+            subfolders3 = [folder for folder in os.listdir(
+                path3) if os.path.join(path3, folder).endswith('.JPG')]
+            for file3 in subfolders3:
+                path4 = os.path.join(path3, file3)
+                img = Image.open(path4)
+                ihash = ih.average_hash(img)
+                if ik.has_key(ihash) and ik[ihash][0] != file:
+                    logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
+                ik[ihash] = [file, file2, file3]
+        print('End %s' % file)
