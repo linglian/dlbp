@@ -19,22 +19,23 @@ num_gpus = 1
 batch_size = 1
 ti = 10
 
-# def download(url,prefix=''):
-#     import os,urllib
-#     filename = prefix+url.split("/")[-1]
-#     if not os.path.exists(filename):
-#         urllib.urlretrieve(url,filename)
-# path='http://data.mxnet.io/models/imagenet-11k/'
-# download(path+'resnet-152/resnet-152-symbol.json','full-')
 
 if __name__ == '__main__':
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:')
+    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:d')
     for op, value in opts:
         if op == '-x':
             mxnetPath = value
         elif op == '-p':
             prefix = value
+        elif op == '-d':
+            def download(url,prefix=''):
+                import os,urllib
+                filename = prefix+url.split("/")[-1]
+                if not os.path.exists(filename):
+                    urllib.urlretrieve(url,filename)
+            path='http://data.mxnet.io/models/imagenet-11k/'
+            download(path+'resnet-152/resnet-152-symbol.json','full-')
         elif op == '-r':
             num_round = int(value)
         elif op == '-l':
