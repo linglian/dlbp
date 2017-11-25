@@ -87,7 +87,8 @@ if __name__ == '__main__':
     
     def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
-        mod = mx.mod.Module(symbol=symbol, context=devs)
+        name_list = [k for k in arg_params if not 'fc' in k]
+        mod = mx.mod.Module(symbol=symbol, context=devs, fixed_param_names=name_list)
         mod.fit(train, val,
             begin_epoch=num_round,
             num_epoch=num_epoch,
@@ -106,6 +107,7 @@ if __name__ == '__main__':
         return mod.score(val, metric)
 
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch=num_round)
+    print arg_params['stage4_unit3_conv3_weight']
     (new_sym, new_params) = get_fine_tune_model(sym, arg_params, num_classes)
     (train, val) = get_iterators(batch_size)
     mod_score = fit(new_sym, new_params, aux_params, train, val, batch_size, num_gpus)
