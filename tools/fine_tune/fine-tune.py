@@ -19,6 +19,14 @@ num_gpus = 1
 batch_size = 1
 ti = 10
 
+# def download(url,prefix=''):
+#     import os,urllib
+#     filename = prefix+url.split("/")[-1]
+#     if not os.path.exists(filename):
+#         urllib.urlretrieve(url,filename)
+# path='http://data.mxnet.io/models/imagenet-11k/'
+# download(path+'resnet-152/resnet-152-symbol.json','full-')
+
 if __name__ == '__main__':
     import getopt
     opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:')
@@ -46,7 +54,6 @@ if __name__ == '__main__':
             all_layers = symbol.get_internals()
             net = all_layers[layer_name+'_output']
             net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
-            net = mx.sym.Activation(net,name='relu2', act_type="relu")
             net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
             net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
             return net
@@ -81,7 +88,7 @@ if __name__ == '__main__':
         opt.set_lr_mult(mult_dict)
         # checkpoint = mx.callback.do_checkpoint(prefix)
         mod.fit(train, val,
-            begin_epoch=num_round + 1,
+            begin_epoch=num_round,
             num_epoch=num_epoch,
             allow_missing=True,
             batch_end_callback = mx.callback.Speedometer(batch_size, ti),
@@ -90,8 +97,8 @@ if __name__ == '__main__':
             initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2),
             eval_metric='acc')
             # epoch_end_callback=checkpoint)
-        mod.symbol.save('full-resnet-152-symbol.json')
-        mod.save_checkpoint(prefix, epoch=num_epoch, save_optimizer_states=True)
+        mod.symbol.save('full-resnet-155-symbol.json')
+        mod.save_checkpoint('full-resnet-155', epoch=num_epoch)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
 
