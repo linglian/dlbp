@@ -34,12 +34,12 @@ if __name__ == '__main__':
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     for file in subfolders:
-        print 'Start %s' % file
+        print('Start %s' % file)
         path2 = os.path.join(path, file)
         subfolders2 = [folder for folder in os.listdir(
             path2) if os.path.isdir(os.path.join(path2, folder))]
         for file2 in subfolders2:
-            print 'Start %s' % file2
+            print('Start %s' % file2)
             path3 = os.path.join(path2, file2)
             if ks.has_key(file2):
                 logging.error('######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2]))
@@ -53,4 +53,4 @@ if __name__ == '__main__':
                 if ik.has_key(ihash) and ik[ihash][0] != file2:
                     logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
                 ik[ihash] = [file2 ,file + '/' + file2 + '/' + file3]
-        print 'End %s' % file
+        print('End %s' % file)
