@@ -89,7 +89,7 @@ if __name__ == '__main__':
         devs = [mx.gpu(i) for i in range(num_gpus)]
         mod = mx.mod.Module(symbol=symbol, context=devs)
         mod.fit(train, val,
-            begin_epoch=num_round
+            begin_epoch=num_round,
             num_epoch=num_epoch,
             arg_params=arg_params,
             aux_params=aux_params,
