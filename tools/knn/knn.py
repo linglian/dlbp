@@ -38,6 +38,7 @@ reportTime = 500
 is_big_key = False
 ks = {}
 is_log = False
+num_round = 0
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -283,11 +284,10 @@ def getFeatures(img, f_mod):
 def init(GPUid=0):
     import mxnet as mx
     prefix = "full-resnet-152"
-    num_round = 0
     model = mx.model.FeedForward.load(
         prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
     internals = model.symbol.get_internals()
-    fea_symbol = internals["pool1_output"]
+    fea_symbol = internals["fc1_output"]
     feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
                                              arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
 
@@ -455,7 +455,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -467,6 +467,8 @@ if __name__ == '__main__':
             loadFeature()
         elif op == '--log':
             is_log = True
+        elif op == '--round':
+            num_round = int(value)
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
