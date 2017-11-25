@@ -44,15 +44,6 @@ if __name__ == '__main__':
             if ks.has_key(file2):
                 logging.error('######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2]))
             ks[file2] = file
-            subfolders3 = [folder for folder in os.listdir(
-                path3) if os.path.join(path3, folder).endswith('.JPG')]
-            for file3 in subfolders3:
-                path4 = os.path.join(path3, file3)
-                img = Image.open(path4)
-                ihash = ih.average_hash(img)
-                if ik.has_key(ihash) and ik[ihash][0] != file2:
-                    logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
-                ik[ihash] = [file2 , file, file2, file3]
         print('End %s' % file)
 
 
