@@ -90,7 +90,7 @@ if __name__ == '__main__':
     
     def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
-        name_list = [k for k in arg_params]
+        name_list = [k for k in arg_params if 'fc' not in k]
         mod = mx.mod.Module(symbol=symbol, context=devs, fixed_param_names=name_list)
         mod.fit(train, val,
             begin_epoch=num_round,
