@@ -57,13 +57,16 @@ if __name__ == '__main__':
         num_classes: the number of classes for the fine-tune datasets
         layer_name: the layer name before the last fully-connected layer
         """
-        all_layers = symbol.get_internals()
-        net = all_layers[layer_name+'_output']
-        net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
-        net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
-        net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
-        new_args = dict({k:arg_params[k] for k in arg_params if 'fc1' not in k})
-        return (net, new_args)
+        if num_round == 0:
+            all_layers = symbol.get_internals()
+            net = all_layers[layer_name+'_output']
+            net = mx.symbol.FullyConnected(data=net, num_hidden=512, name='fc1')
+            net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc2')
+            net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
+            new_args = dict({k:arg_params[k] for k in arg_params if 'fc' not in k})
+            return (net, new_args)
+        else:
+            return (symbol, arg_params)
 
     def get_iterators(batch_size, data_shape=(3, 224, 224)):
         train = mx.io.ImageRecordIter(
@@ -87,7 +90,7 @@ if __name__ == '__main__':
     
     def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
-        name_list = [k for k in arg_params if not 'fc' in k]
+        name_list = [k for k in arg_params]
         mod = mx.mod.Module(symbol=symbol, context=devs, fixed_param_names=name_list)
         mod.fit(train, val,
             begin_epoch=num_round,
