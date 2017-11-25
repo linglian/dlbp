@@ -6,7 +6,7 @@ from PIL import Image
 import sys
 sys.path.append('/home/lol/anaconda2/lib/python2.7/site-packages')
 import imagehash as ih
-
+import cv2
 import logging
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
@@ -62,9 +62,13 @@ if __name__ == '__main__':
                 path3) if os.path.join(path3, folder).endswith('.JPG')]
             for file3 in subfolders3:
                 path4 = os.path.join(path3, file3)
-                img = Image.open(path4)
-                ihash = ih.average_hash(img)
-                if ik.has_key(ihash) and ik[ihash][0] != file:
-                    logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
-                ik[ihash] = [file, file2, file3]
+                m = cv2.imread(path4, 1)
+                if m is not None:
+                    img = Image.fromarray(m)
+                    ihash = ih.average_hash(img)
+                    if ik.has_key(ihash) and ik[ihash][0] != file:
+                        logging.error('######### Error Has Same Image: %s == %s' % (path4, ik[ihash]))
+                    ik[ihash] = [file, file2, file3]
+                else:
+                    logging.error('Bad Image: %s' % path4)
         print('End %s' % file)
