@@ -69,6 +69,7 @@ if __name__ == '__main__':
             net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
             new_args = dict({k: arg_params[k]
                              for k in arg_params if 'fc' not in k})
+            return (net, new_args)
         elif num_round == 0:
             all_layers = symbol.get_internals()
             net = all_layers[layer_name + '_output']
@@ -134,8 +135,8 @@ if __name__ == '__main__':
                 initializer=mx.init.Xavier(
                     rnd_type='gaussian', factor_type="in", magnitude=2),
                 eval_metric='acc')
-        mod.symbol.save('full-resnet-156')
-        mod.save_checkpoint('full-resnet-156', epoch=num_epoch,
+        mod.symbol.save('full-resnet-153')
+        mod.save_checkpoint('full-resnet-153', epoch=num_epoch,
                             save_optimizer_states=True)
         metric = mx.metric.Accuracy()
         return mod.score(val, metric)
