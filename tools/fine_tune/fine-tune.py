@@ -18,14 +18,16 @@ batch_per_gpu = 1
 num_gpus = 1
 batch_size = 1
 ti = 10
-
+is_stop = False
 
 if __name__ == '__main__':
     import getopt
-    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:d')
+    opts, args = getopt.getopt(sys.argv[1:], 'x:p:r:e:l:b:t:ds')
     for op, value in opts:
         if op == '-x':
             mxnetPath = value
+        if op == '-s':
+            is_stop = True
         elif op == '-p':
             prefix = value
         elif op == '-d':
@@ -58,7 +60,16 @@ if __name__ == '__main__':
         num_classes: the number of classes for the fine-tune datasets
         layer_name: the layer name before the last fully-connected layer
         """
-        if num_round == 0:
+        if is_stop and num_round == 0:
+            layer_name = 'flatten0'
+            all_layers = symbol.get_internals()
+            net = all_layers[layer_name + '_output']
+            net = mx.symbol.FullyConnected(
+                data=net, num_hidden=11221, name='fc1')
+            net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
+            new_args = dict({k: arg_params[k]
+                             for k in arg_params if 'fc' not in k})
+        elif num_round == 0:
             all_layers = symbol.get_internals()
             net = all_layers[layer_name + '_output']
             net = mx.symbol.Convolution(data=net, cudnn_tune='limited_workspace',
@@ -102,11 +113,14 @@ if __name__ == '__main__':
 
     def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
         devs = [mx.gpu(i) for i in range(num_gpus)]
-        name_list = [k for k in arg_params if not (
-            'fc' in k or 'stage4_unit3_conv3_weight' in k)]
-        print name_list
-        mod = mx.mod.Module(symbol=symbol, context=devs,
-                            fixed_param_names=name_list)
+        if is_stop:
+            mod = mx.mod.Module(symbol=symbol, context=devs)
+        else:
+            name_list = [k for k in arg_params if not (
+                'fc' in k or 'stage4_unit3_conv3_weight' in k)]
+            print name_list
+            mod = mx.mod.Module(symbol=symbol, context=devs,
+                                fixed_param_names=name_list)
         mod.fit(train, val,
                 begin_epoch=num_round,
                 num_epoch=num_epoch,
