@@ -283,11 +283,11 @@ def getFeatures(img, f_mod):
 
 def init(GPUid=0):
     import mxnet as mx
-    prefix = "full-resnet-154"
+    prefix = "full-resnet-156"
     model = mx.model.FeedForward.load(
         prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
     internals = model.symbol.get_internals()
-    fea_symbol = internals["fc1_output"]
+    fea_symbol = internals["pool1_output"]
     feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
                                              arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
 
