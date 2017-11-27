@@ -15,72 +15,81 @@ def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
 
-checkFold(path + '/lst2')
+if __name__ == '__main__':
+    import sys
+    import getopt
 
-checkFile(path + '/lst2/test.lst')
+    opts, args = getopt.getopt(sys.argv[1:], 'f:')
+    for op, value in opts:
+        if op == '-f':
+            path = value
 
-out = open(path + '/lst2/test.lst', 'w')
+    checkFold(path + '/lst2')
 
-checkFile(path + '/lst2/train.lst')
+    checkFile(path + '/lst2/test.lst')
 
-out2 = open(path + '/lst2/train.lst', 'w')
+    out = open(path + '/lst2/test.lst', 'w')
 
-r = 0.02
+    checkFile(path + '/lst2/train.lst')
 
-main = np.load(os.path.join(path, 'knn_train.npy'))
+    out2 = open(path + '/lst2/train.lst', 'w')
 
-test = main[:int(len(main) * r)]
-train = main[int(len(main) * r):]
+    r = 0.02
 
-print 'Test: %d Train: %d' %(len(test), len(train))
-ks = {}
-subfolders = [folder for folder in os.listdir(
-    path) if os.path.isdir(os.path.join(path, folder))]
-for file in subfolders:
-    print 'Start %s' % file
-    path2 = os.path.join(path, file)
-    subfolders2 = [folder for folder in os.listdir(
-        path2) if os.path.isdir(os.path.join(path2, folder))]
-    for file2 in subfolders2:
-        if ks.has_key(file2):
-            print '######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2])
-        ks[file2] = file
-    print 'End %s' % file
+    main = np.load(os.path.join(path, 'knn_train.npy'))
 
-key = {}
+    test = main[:int(len(main) * r)]
+    train = main[int(len(main) * r):]
 
-n = 0
+    print 'Test: %d Train: %d' %(len(test), len(train))
+    ks = {}
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    for file in subfolders:
+        print 'Start %s' % file
+        path2 = os.path.join(path, file)
+        subfolders2 = [folder for folder in os.listdir(
+            path2) if os.path.isdir(os.path.join(path2, folder))]
+        for file2 in subfolders2:
+            if ks.has_key(file2):
+                print '######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2])
+            ks[file2] = file
+        print 'End %s' % file
 
-num = len(test) + len(train)
+    key = {}
 
-t_n = 0
+    n = 0
 
-t = 0
+    num = len(test) + len(train)
 
-for i in test:
-    img = Image.fromarray(i[0])
-    img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
-    if not key.has_key(ks[i[1]]):
-        key[ks[i[1]]] = n
-        n += 1
-    out.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
-    t_n += 1
-    if t_n % 500 == 1:
-        print 'Finish %d/%d' % (t_n, num)
-    t += 1
+    t_n = 0
 
-t = 0
-for i in train:
-    img = Image.fromarray(i[0])
-    img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
-    if not key.has_key(ks[i[1]]):
-        key[ks[i[1]]] = n
-        n += 1
-    out2.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
-    t_n += 1
-    if t_n % 500 == 1:
-        print 'Finish %d/%d' % (t_n, num)
-    t += 1
+    t = 0
 
-out.close()
-out2.close()
+    for i in test:
+        img = Image.fromarray(i[0])
+        img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+        if not key.has_key(ks[i[1]]):
+            key[ks[i[1]]] = n
+            n += 1
+        out.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+        t_n += 1
+        if t_n % 500 == 1:
+            print 'Finish %d/%d' % (t_n, num)
+        t += 1
+
+    t = 0
+    for i in train:
+        img = Image.fromarray(i[0])
+        img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+        if not key.has_key(ks[i[1]]):
+            key[ks[i[1]]] = n
+            n += 1
+        out2.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+        t_n += 1
+        if t_n % 500 == 1:
+            print 'Finish %d/%d' % (t_n, num)
+        t += 1
+
+    out.close()
+    out2.close()
