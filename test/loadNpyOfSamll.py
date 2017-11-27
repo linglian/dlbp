@@ -2,6 +2,7 @@
 import numpy as np
 import os
 import sys
+import string
 from PIL import Image
 path = '/home/lol/dl/Image'
 
@@ -67,29 +68,31 @@ if __name__ == '__main__':
     t = 0
 
     for i in test:
-        img = Image.fromarray(i[0])
-        img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
-        if not key.has_key(ks[i[1]]):
-            key[ks[i[1]]] = n
-            n += 1
-        out.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
-        t_n += 1
-        if t_n % 500 == 1:
-            print 'Finish %d/%d' % (t_n, num)
-        t += 1
+        if i[1].isdigit():
+            img = Image.fromarray(i[0])
+            img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+            if not key.has_key(ks[i[1]]):
+                key[ks[i[1]]] = n
+                n += 1
+            out.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+            t_n += 1
+            if t_n % 500 == 1:
+                print 'Finish %d/%d' % (t_n, num)
+            t += 1
 
     t = 0
     for i in train:
-        img = Image.fromarray(i[0])
-        img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
-        if not key.has_key(ks[i[1]]):
-            key[ks[i[1]]] = n
-            n += 1
-        out2.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
-        t_n += 1
-        if t_n % 500 == 1:
-            print 'Finish %d/%d' % (t_n, num)
-        t += 1
+        if i[1].isdigit():
+            img = Image.fromarray(i[0])
+            img.save(path + '/lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2]))
+            if not key.has_key(ks[i[1]]):
+                key[ks[i[1]]] = n
+                n += 1
+            out2.write('%d\t%d\t%s\n' % (t, int(i[1]), 'lst2/%s_%s_%s' % (ks[i[1]], i[1], i[2])))
+            t_n += 1
+            if t_n % 500 == 1:
+                print 'Finish %d/%d' % (t_n, num)
+            t += 1
 
     out.close()
     out2.close()
