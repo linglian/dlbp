@@ -456,7 +456,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -470,6 +470,8 @@ if __name__ == '__main__':
             is_log = True
         elif op == '--round':
             num_round = int(value)
+        elif op == '--prefix':
+            prefix = value
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
