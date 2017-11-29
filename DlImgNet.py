@@ -1,7 +1,5 @@
 import os,urllib
 import sys
-sys.path.insert(0, '/home/lol/dl/mxnet/python')
-import mxnet as mx
 
 def download(url,prefix=''):
     filename = prefix+url.split("/")[-1]
