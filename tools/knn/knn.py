@@ -373,8 +373,12 @@ def loadFeature():
         if n % 500 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
-    np.save(os.path.join(path, prefix + '_feature_test.npy'), testList)
-    np.save(os.path.join(path, prefix + '_feature_train.npy'), trainList)
+    if is_caffe == False:
+        np.save(os.path.join(path, prefix + '_feature_test.npy'), testList)
+        np.save(os.path.join(path, prefix + '_feature_train.npy'), trainList)
+    else:
+        np.save(os.path.join(path, 'caffe_feature_test.npy'), testList)
+        np.save(os.path.join(path, 'caffe_feature_train.npy'), trainList)
     print 'End Feature: Speed Time %f' % (time.time() - m_t)
 
 
