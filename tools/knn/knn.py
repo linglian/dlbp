@@ -292,7 +292,6 @@ def getFeatures(img, f_mod=None, transformer=None):
         im=caffe.io.load_image('temp.JPG')                   #加载图片
         f_mod.blobs['data'].data[...] = transformer.preprocess('data',im)      #执行上面设置的图片预处理操作，并将图片载入到blob中
         out = f_mod.forward()
-        print out
         f = f_mod.blobs['pool5/7x7_s1'].data
         f = np.ravel(f[0])
         return f
