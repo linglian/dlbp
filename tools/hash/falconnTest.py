@@ -75,6 +75,7 @@ def runTest():
             q = t.construct_query_pool()
         else:
             q = t.construct_query_object()
+        t2 = time.time()
         for i in test:
             t1 = time.time()
             tList = train[q.find_k_nearest_neighbors(i[0], k)]
@@ -104,9 +105,9 @@ def runTest():
                              (m_right / float(m_num) * 100.0))
                 logging.info('Last loss: %.2f %%' %
                              (m_bad / float(m_num) * 100.0))
-                1
                 logging.info('right: %d bad: %d now: %d/%d Time: %.5fs/1iter' %
                              (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
+        logging.info('Speed Time: %.8f' % ((time.time() - t2) / testNum))
     logging.info('Last accuracy: %.2f %% (%d/%d)' % ((m_right / float(m_num) * 100.0), m_right, m_num))
     logging.info('Last loss: %.2f %% (%d/%d)' % ((m_bad / float(m_num) * 100.0), m_bad, m_num))
     logging.info('End Run Test')
