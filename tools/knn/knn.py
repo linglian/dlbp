@@ -42,8 +42,10 @@ num_round = 0
 prefix = "full-resnet-152"
 is_caffe = False
 caffe_path = '/home/lol/dl/caffe/python'
+sys.path.insert(0, caffe_path)
 deploy='./deploy.prototxt'    #deploy文件
 caffe_model='./bvlc_googlenet.caffemodel'   #训练好的 caffemodel
+layer = 'pool1_output'
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
@@ -285,12 +287,7 @@ def getFeatures(img, f_mod=None, transformer=None):
         f = f_mod.predict(img)
         f = np.ravel(f)
     else:
-        sys.path.insert(0, caffe_path)
-        import caffe
-        im = Image.fromarray(img)
-        im.save('temp.JPG')
-        im=caffe.io.load_image('temp.JPG')                   #加载图片
-        f_mod.blobs['data'].data[...] = transformer.preprocess('data',im)      #执行上面设置的图片预处理操作，并将图片载入到blob中
+        f_mod.blobs['data'].data[...] = getImage(img)     #执行上面设置的图片预处理操作，并将图片载入到blob中
         out = f_mod.forward()
         f = f_mod.blobs['pool5/7x7_s1'].data
         f = np.ravel(f[0])
@@ -303,21 +300,15 @@ def init(GPUid=0):
         model = mx.model.FeedForward.load(
             prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
         internals = model.symbol.get_internals()
-        fea_symbol = internals["pool1_output"]
+        fea_symbol = internals[layer]
         feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
                                                 arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
 
         return feature_extractor
     else:
-        sys.path.insert(0, caffe_path)
         import caffe
-        net = caffe.Net(deploy, caffe_model, 1)   #加载model和network
-        transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
-        transformer.set_transpose('data', (2,0,1))    #改变维度的顺序，由原始图片(28,28,3)变为(3,28,28)
-        #transformer.set_mean('data', np.load(mean_file).mean(1).mean(1))    #减去均值，前面训练模型时没有减均值，这儿就不用
-        transformer.set_raw_scale('data', 255)    # 缩放到【0，255】之间
-        transformer.set_channel_swap('data', (2,1,0))   #交换通道，将图片由RGB变为BGR
-        return (net, transformer)
+        net = caffe.Net(deploy, caffe_model, 0)   #加载model和network
+        return net
         
 
 def removeAllSpliteOfPath():
@@ -342,34 +333,23 @@ def loadFeature():
     trainNum = len(train)
     m_t = time.time()
     print 'Start Feature: Test: %d Train: %d' % (testNum, trainNum)
-    if is_caffe == False:
-        mod = init()
-    else:
-        mod, transformer = init()
+    mod = init()
     testList = []
     n = 0
     t_time = time.time()
     for i in test:
-        if is_caffe == False:
-            testList.append([getFeatures(i[0], mod), i[1], i[2]])
-        else:
-            f = getFeatures(i[0], mod, transformer)
-            testList.append([f, i[1], i[2]])
+        testList.append([getFeatures(i[0], mod), i[1], i[2]])
         n += 1
-        if n % 500 == 0:
+        if n % 1 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
             t_time = time.time()
     trainList = []
     n = 0
     t_time = time.time()
     for i in train:
-        if is_caffe == False:
-            trainList.append([getFeatures(i[0], mod), i[1], i[2]])
-        else:
-            f = getFeatures(i[0], mod, transformer)
-            trainList.append([f, i[1], i[2]])
+        trainList.append([getFeatures(i[0], mod), i[1], i[2]])
         n += 1
-        if n % 500 == 0:
+        if n % 1 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
     if is_caffe == False:
@@ -403,7 +383,7 @@ def loadHash():
     for i in train:
         trainList.append([getHash(i[0]), i[1], i[2]])
         n += 1
-        if n % 10 == 0:
+        if n % 500 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
     np.save(os.path.join(path, 'hash_test.npy'), testList)
@@ -497,7 +477,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -515,8 +495,11 @@ if __name__ == '__main__':
             num_round = int(value)
         elif op == '--prefix':
             prefix = value
+        elif op == '--layer':
+            layer = value
         elif op == '--caffe_path':
             caffe_path = value
+            sys.path.insert(0, caffe_path)
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
