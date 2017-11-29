@@ -358,7 +358,7 @@ def loadHash():
             t_time = time.time()
     trainList = []
     n = 0
-    t_time = time.time()test_ratio
+    t_time = time.time()
     for i in train:
         trainList.append([getHash(i[0]), i[1], i[2]])
         n += 1
