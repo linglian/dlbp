@@ -127,7 +127,7 @@ if __name__ == '__main__':
         elif op == '-h':
             resetTest = True
         elif op == '-h':
-            dim = (int)value
+            dim = int(value)
         elif op == '-v':
             test_name = value
         elif op == '--log':
