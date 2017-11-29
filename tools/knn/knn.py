@@ -403,7 +403,7 @@ def loadHash():
     for i in train:
         trainList.append([getHash(i[0]), i[1], i[2]])
         n += 1
-        if n % 500 == 0:
+        if n % 10 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
     np.save(os.path.join(path, 'hash_test.npy'), testList)
