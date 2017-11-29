@@ -456,7 +456,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix='])
     for op, value in opts:
         if op == '-f':
             path = value
