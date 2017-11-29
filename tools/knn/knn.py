@@ -193,6 +193,7 @@ def load_all_img(path, not_double=True):
                 filepath2) if not os.path.isdir(os.path.join(filepath2, folder)) and os.path.join(filepath2, folder).endswith('.JPG')]
             print subfolders3
             for img in subfolders3:
+                t2 = time.time()
                 filepath3 = os.path.join(filepath2, img)
                 print filepath3
                 m = cv2.imread(filepath3, 1)
@@ -202,6 +203,7 @@ def load_all_img(path, not_double=True):
                     imgArray.append([im, file2, img])
                 else:
                     logging.error('Bad Image: %s' % filepath3)
+                print '#### SpeedTime: %f' % (time.time() - t2)
             print 'SpeedTime: %f' % (time.time() - t1)
             np.save(os.path.join(filepath2, 'knn.npy'), imgArray)
         print '%s has %d' % (file, n)
