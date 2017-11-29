@@ -24,13 +24,13 @@ logging.getLogger('').addHandler(console)
 
 
 path = '/home/lol/dl/Image'
+test_name = 'knn'
+mxnetpath = '/home/lol/dl/mxnet/python'
 not_double = True
 test_ratio = 0.02
 tilesPerImage = 1
 k = 1
 times = 1
-mxnetpath = '/home/lol/dl/mxnet/python'
-test_name = 'knn'
 sys.path.insert(0, mxnetpath)
 resetTest = False
 distType = 1
@@ -283,7 +283,7 @@ def getFeatures(img, f_mod):
 
 def init(GPUid=0):
     import mxnet as mx
-    prefix = "full-resnet-156"
+    prefix = "full-resnet-152"
     model = mx.model.FeedForward.load(
         prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
     internals = model.symbol.get_internals()
@@ -358,7 +358,7 @@ def loadHash():
             t_time = time.time()
     trainList = []
     n = 0
-    t_time = time.time()
+    t_time = time.time()test_ratio
     for i in train:
         trainList.append([getHash(i[0]), i[1], i[2]])
         n += 1
