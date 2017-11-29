@@ -105,7 +105,7 @@ def runTest():
                 logging.info('Last loss: %.2f %%' %
                              (m_bad / float(m_num) * 100.0))
                 1
-                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/1iter' %
+                logging.info('right: %d bad: %d now: %d/%d Time: %.5fs/1iter' %
                              (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
     logging.info('Last accuracy: %.2f %% (%d/%d)' % ((m_right / float(m_num) * 100.0), m_right, m_num))
     logging.info('Last loss: %.2f %% (%d/%d)' % ((m_bad / float(m_num) * 100.0), m_bad, m_num))
