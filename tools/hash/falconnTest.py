@@ -76,9 +76,7 @@ def runTest():
         else:
             q = t.construct_query_object()
         for i in test:
-            t_num = 0
             t1 = time.time()
-            # print i[1], i[2]
             tList = train[q.find_k_nearest_neighbors(i[0], k)]
             is_true = False
             for l in tList:
@@ -101,15 +99,14 @@ def runTest():
                     else:
                         logging.error('###### Bad %s: %s with %s' (i[1], i[2], tList))
             m_num += 1
-            t_num += 1
             if m_num % reportTime == 1:
                 logging.info('Last accuracy: %.2f %%' %
                              (m_right / float(m_num) * 100.0))
                 logging.info('Last loss: %.2f %%' %
                              (m_bad / float(m_num) * 100.0))
-                t_min = min(t_num, reportTime)
-                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/%diter' %
-                             (m_right, m_bad, m_num, testNum * times, (time.time() - t1), t_min))
+                1
+                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/1iter' %
+                             (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
     logging.info('Last accuracy: %.2f %% (%d/%d)' % ((m_right / float(m_num) * 100.0), m_right, m_num))
     logging.info('Last loss: %.2f %% (%d/%d)' % ((m_bad / float(m_num) * 100.0), m_bad, m_num))
     logging.info('End Run Test')
