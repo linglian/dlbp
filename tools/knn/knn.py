@@ -39,6 +39,7 @@ is_big_key = False
 ks = {}
 is_log = False
 num_round = 0
+prefix = "full-resnet-152"
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -283,7 +284,6 @@ def getFeatures(img, f_mod):
 
 def init(GPUid=0):
     import mxnet as mx
-    prefix = "full-resnet-152"
     model = mx.model.FeedForward.load(
         prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
     internals = model.symbol.get_internals()
@@ -335,8 +335,8 @@ def loadFeature():
         if n % 500 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
-    np.save(os.path.join(path, 'feature_test.npy'), testList)
-    np.save(os.path.join(path, 'feature_train.npy'), trainList)
+    np.save(os.path.join(path, prefix + '_feature_test.npy'), testList)
+    np.save(os.path.join(path, prefix + '_feature_train.npy'), trainList)
     print 'End Feature: Speed Time %f' % (time.time() - m_t)
 
 
