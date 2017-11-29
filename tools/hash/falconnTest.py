@@ -33,6 +33,7 @@ is_log = False
 ks = {}
 k = 1
 is_pool = True
+dim = 2048
 
 def resetRandom():
     import random
@@ -66,7 +67,7 @@ def runTest():
         train = np.load(os.path.join(path, test_name + '_train.npy'))
         testNum = len(test)
         trainNum = len(train)
-        p = falconn.get_default_parameters(trainNum, 2048)
+        p = falconn.get_default_parameters(trainNum, dim)
         t = falconn.LSHIndex(p)
         dataset = [np.ravel(x[0]).astype(np.float32) for x in train]
         dataset = np.array(dataset)
@@ -119,12 +120,14 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hb', ['time=', 'dist=', 'report=', 'size', 'log'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hbd:', ['time=', 'dist=', 'report=', 'size', 'log'])
     for op, value in opts:
         if op == '-f':
             path = value
         elif op == '-h':
             resetTest = True
+        elif op == '-h':
+            dim = (int)value
         elif op == '-v':
             test_name = value
         elif op == '--log':
