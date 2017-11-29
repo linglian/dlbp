@@ -93,11 +93,9 @@ def runTest():
                 m_bad += 1
                 if is_log:
                     if is_big_key:
-                        logging.error('###### Bad %s(%s: %s) with %s' (
-                            ks[i[1]], i[1], i[2], tList))
+                        logging.error('###### Bad %s(%s: %s) with %s' (ks[i[1]], i[1], i[2], tList))
                     else:
-                        logging.error(
-                            '###### Bad %s: %s with %s' (i[1], i[2], tList))
+                        logging.error('###### Bad %s: %s with %s' (i[1], i[2], tList))
             m_num += 1
             t_num += 1
             if m_num % reportTime == 1:
@@ -113,56 +111,48 @@ def runTest():
     logging.info('End Run Test')
 
 
-runTest()
 
-# if __name__ == '__main__':
-#     import sys
-#     import getopt
-#     from collections import Counter
-#     import random
+if __name__ == '__main__':
+    import sys
+    import getopt
+    from collections import Counter
+    import random
 
-#     opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round='])
-#     for op, value in opts:
-#         if op == '-f':
-#             path = value
-#         elif op == '-h':
-#             resetTest = True
-#         elif op == '-v':
-#             test_name = value
-#         elif op == '-g':
-#             loadFeature()
-#         elif op == '--log':
-#             is_log = True
-#         elif op == '-b':
-#             is_big_key = True
-#             subfolders = [folder for folder in os.listdir(
-#                 path) if os.path.isdir(os.path.join(path, folder))]
-#             for file in subfolders:
-#                 print 'Start %s' % file
-#                 path2 = os.path.join(path, file)
-#                 subfolders2 = [folder for folder in os.listdir(
-#                     path2) if os.path.isdir(os.path.join(path2, folder))]
-#                 for file2 in subfolders2:
-#                     if ks.has_key(file2):
-#                         print '######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2])
-#                     ks[file2] = file
-#                 print 'End %s' % file
-#         elif op == '--hash':
-#             loadHash()
-#         elif op == '-x':
-#             mxnetpath = value
-#             sys.path.insert(0, mxnetpath)
-#         elif op == '-k':
-#             k = int(value)
-#         elif op == '--time':
-#             times = int(value)
-#         elif op == '--report':
-#             reportTime = int(value)
-#         elif op == '-r':
-#             test_ratio = float(value)
-#         elif op == '--size':
-#             test = np.load(os.path.join(path, test_name + '_test.npy'))
-#             train = np.load(os.path.join(path, test_name + '_train.npy'))
-#             print 'Size: %d' % (len(test) + len(train))
-#         elif op == '-t':
-#             runTest()
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mkv:hb', ['time=', 'dist=', 'report=', 'size', 'log'])
+    for op, value in opts:
+        if op == '-f':
+            path = value
+        elif op == '-h':
+            resetTest = True
+        elif op == '-v':
+            test_name = value
+        elif op == '--log':
+            is_log = True
+        elif op == '-b':
+            is_big_key = True
+            subfolders = [folder for folder in os.listdir(
+                path) if os.path.isdir(os.path.join(path, folder))]
+            for file in subfolders:
+                print 'Start %s' % file
+                path2 = os.path.join(path, file)
+                subfolders2 = [folder for folder in os.listdir(
+                    path2) if os.path.isdir(os.path.join(path2, folder))]
+                for file2 in subfolders2:
+                    if ks.has_key(file2):
+                        print '######### Error Has Same: %s(%s) %s' % (file, file2, ks[file2])
+                    ks[file2] = file
+                print 'End %s' % file
+        elif op == '-k':
+            k = int(value)
+        elif op == '--time':
+            times = int(value)
+        elif op == '--report':
+            reportTime = int(value)
+        elif op == '-r':
+            test_ratio = float(value)
+        elif op == '--size':
+            test = np.load(os.path.join(path, test_name + '_test.npy'))
+            train = np.load(os.path.join(path, test_name + '_train.npy'))
+            print 'Size: %d' % (len(test) + len(train))
+        elif op == '-t':
+            runTest()
