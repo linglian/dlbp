@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0, '/home/lol/anaconda2/lib/python2.7/site-packages')
+sys.path.insert(0, '/home/lol/anaconda2/lib/python2.7/dist-packages')
 import falconn
 import numpy as np
 import os
@@ -79,6 +80,7 @@ def runTest():
             tList = train[q.find_k_nearest_neighbors(i[0], k)]
             is_true = False
             for l in tList:
+                            
                 if is_big_key:
                     if ks[l[1]] == ks[i[1]]:
                         is_true = True
