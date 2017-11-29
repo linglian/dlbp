@@ -71,7 +71,7 @@ def runTest():
         dataset = [np.ravel(x[0]).astype(np.float32) for x in train]
         dataset = np.array(dataset)
         t.setup(dataset)
-        q = t.construct_query_object()
+        q = t.construct_query_pool()
 
         for i in test:
             t_num = 0
@@ -111,7 +111,6 @@ def runTest():
     logging.info('Last accuracy: %.2f %% (%d/%d)' % ((m_right / float(m_num) * 100.0), m_right, m_num))
     logging.info('Last loss: %.2f %% (%d/%d)' % ((m_bad / float(m_num) * 100.0), m_bad, m_num))
     logging.info('End Run Test')
-
 
 
 if __name__ == '__main__':
