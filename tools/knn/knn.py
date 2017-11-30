@@ -28,7 +28,7 @@ test_name = 'knn'
 mxnetpath = '/home/lol/dl/mxnet/python'
 not_double = True
 test_ratio = 0.02
-tilesPerImage = 1
+tilesPerImage = 360
 k = 1
 times = 1
 sys.path.insert(0, mxnetpath)
@@ -46,6 +46,7 @@ sys.path.insert(0, caffe_path)
 deploy='./deploy.prototxt'    #deploy文件
 caffe_model='./bvlc_googlenet.caffemodel'   #训练好的 caffemodel
 layer = 'pool1_output'
+knn_name = 'knn'
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
@@ -120,6 +121,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
         imgsfiles = [os.path.join(fold, subfolder, img)
                      for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
         print 'Start Directory: %s' % subfolder
+        temp_list = []
         for imgfile in imgsfiles:
             print 'Start Image: %s' % imgfile
             im = Image.open(imgfile)
@@ -162,9 +164,13 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
                     im_cropped = im_crotate_image_square(
                         im_cropped, roate_drgree)
                 if w != 0 and h != 0:
-                    im_cropped.save(newname)
+                    # im_cropped.save(newname)
+                    im_cropped = cv2.resize(np.array(im_cropped), (224, 224))
+                    temp_list.append(im_cropped)
             # don't remove startImg
             # os.remove(imgfile)
+        print 'Save %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
+        np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
     return fold
 
 def load_all_img(path, not_double=True):
@@ -230,10 +236,10 @@ def load_all_beOne(path, test_ratio=0.02):
         for file2 in subfolders2:
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
-            imgArray = np.load(os.path.join(filepath2, 'knn.npy'))
-            print 'Load Knn.npy: %s' % (os.path.join(filepath2, 'knn.npy'))
+            imgArray = np.load(os.path.join(filepath2, knn_name + '.npy'))
+            print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
             if len(imgArray) == 0:
-                logging.error('Bad Npy: %s' % os.path.join(filepath2, 'knn.npy'))
+                logging.error('Bad Npy: %s' % os.path.join(filepath2, knn_name + '.npy'))
             for i in imgArray:
                 main_imgArray.append(i)
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
@@ -329,8 +335,8 @@ def removeAllSpliteOfPath():
             print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
 
 def loadFeature():
-    test = np.load(os.path.join(path, 'knn_test.npy'))
-    train = np.load(os.path.join(path, 'knn_train.npy'))
+    test = np.load(os.path.join(path, knn_name + '_test.npy'))
+    train = np.load(os.path.join(path, knn_name + '_train.npy'))
     testNum = len(test)
     trainNum = len(train)
     m_t = time.time()
@@ -355,8 +361,8 @@ def loadFeature():
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
             t_time = time.time()
     if is_caffe == False:
-        np.save(os.path.join(path, prefix + '_feature_test.npy'), testList)
-        np.save(os.path.join(path, prefix + '_feature_train.npy'), trainList)
+        np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_test.npy'), testList)
+        np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_train.npy'), trainList)
     else:
         np.save(os.path.join(path, 'caffe_feature_test.npy'), testList)
         np.save(os.path.join(path, 'caffe_feature_train.npy'), trainList)
@@ -479,7 +485,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -499,6 +505,8 @@ if __name__ == '__main__':
             prefix = value
         elif op == '--layer':
             layer = value
+        elif op == '--knn_name':
+            knn_name = value
         elif op == '--caffe_path':
             caffe_path = value
             sys.path.insert(0, caffe_path)
@@ -547,7 +555,7 @@ if __name__ == '__main__':
             print 'Size: %d' % (len(test) + len(train))
         elif op == '-l':
             test, train = load_all_beOne(path, test_ratio=test_ratio)
-            np.save(os.path.join(path, 'knn_test.npy'), test)
-            np.save(os.path.join(path, 'knn_train.npy'), train)
+            np.save(os.path.join(path, knn_name + '_test.npy'), test)
+            np.save(os.path.join(path, knn_name + '_train.npy'), train)
         elif op == '-t':
             runTest()
