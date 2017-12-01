@@ -47,6 +47,76 @@ deploy='./deploy.prototxt'    #deploy文件
 caffe_model='./bvlc_googlenet.caffemodel'   #训练好的 caffemodel
 layer = 'pool1_output'
 knn_name = 'knn'
+is_feature_now = False
+is_init_mod = False
+
+def getDistances(f, t, type=1):
+    if type == 1:
+        return getDistOfL2(f, t)
+    elif type == 2:
+        return getDistOfHash(f, t)
+    elif type == 3:
+        return getDistOfSquare(f, t)
+    elif type == 4:
+        return 1.0 - getDistOfCos(f, t)
+
+def getDistOfL2(form, to):
+    return cv2.norm(form, to, normType=cv2.NORM_L2)
+
+def getDistOfSquare(form, to):
+    return np.sqrt(np.sum(np.square(form - to)))
+
+def getDistOfHash(f, t):
+    return f[0].__sub__(t[0])
+
+def getDistOfCos(f, t):
+    up = np.sum(np.multiply(f, t))
+    ff = np.sqrt(np.sum(np.multiply(f, f)))
+    tt = np.sqrt(np.sum(np.multiply(t, t)))
+    down = ff * tt
+    return  up / down
+
+def getMinOfNum(a, K):
+    a = np.array(a)
+    return sorted(a, key=lambda a: a[0])[0:K]
+
+def removeAllSplits(path):
+    imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
+    print 'del Img: %s' % imgList
+    for i in imgList:
+        removeFile(os.path.join(path, i))
+
+
+def getImage(img):
+    img = np.swapaxes(img, 0, 2)
+    img = np.swapaxes(img, 1, 2)
+    img = img[np.newaxis, :]
+    return img
+
+def getFeatures(img, f_mod=None, transformer=None):
+    if is_caffe == False:
+        img = getImage(img)
+        f = f_mod.predict(img)
+        f = np.ravel(f)
+    else:
+        f_mod.blobs['data'].data[...] = getImage(img)     #执行上面设置的图片预处理操作，并将图片载入到blob中
+        out = f_mod.forward()
+        f = f_mod.blobs['pool5/7x7_s1'].data
+        f = np.ravel(f[0])
+        return f
+    return f
+
+def init(GPUid=0):
+    import mxnet as mx
+    model = mx.model.FeedForward.load(
+        prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
+    internals = model.symbol.get_internals()
+    fea_symbol = internals[layer]
+    feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
+                                            arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
+    init_mod = feature_extractor
+    return feature_extractor
+        
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
@@ -65,7 +135,7 @@ def getHash(img):
     im = Image.fromarray(img)
     return ih.average_hash(im, 8)
 
-def splits_resamples(facescrub_root, tilesPerImage=360):
+def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     #import sklearn
     thresholdGLOABL = 0.42
     from PIL import Image
@@ -122,7 +192,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
                      for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
         print 'Start Directory: %s' % subfolder
         temp_list = []
-        if os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
+        if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
             print 'Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
             continue
         for imgfile in imgsfiles:
@@ -173,7 +243,10 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
                     if w != 0 and h != 0:
                         # im_cropped.save(newname)
                         im_cropped = cv2.resize(np.array(im_cropped), (224, 224))
-                        temp_list.append(im_cropped)
+                        if is_feature_now == False:
+                            temp_list.append(im_cropped)
+                        else:
+                            temp_list.append([getFeatures(im_cropped, mod), subfolder, newname])
                 # don't remove startImg
                 # os.remove(imgfile)
             except IOError:
@@ -259,92 +332,16 @@ def load_all_beOne(path, test_ratio=0.02):
                 continue
             t_time = time.time()
             testNum += len(imgArray)
-            temp_list = []
             for i in imgArray:
-                tim = getFeatures(i, mod)
-                temp_list.append([tim, file, file2])
-                main_imgArray.append([tim, file, file2])
+                main_imgArray.append(i)
                 n += 1
                 if n % reportTime == 0:
-                    print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
+                    # print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
                     t_time = time.time()
-            np.save(os.path.join(filepath2, 'main_feature_knn.npy'), temp_list)
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
 
-def getDistances(f, t, type=1):
-    if type == 1:
-        return getDistOfL2(f, t)
-    elif type == 2:
-        return getDistOfHash(f, t)
-    elif type == 3:
-        return getDistOfSquare(f, t)
-    elif type == 4:
-        return 1.0 - getDistOfCos(f, t)
-
-def getDistOfL2(form, to):
-    return cv2.norm(form, to, normType=cv2.NORM_L2)
-
-def getDistOfSquare(form, to):
-    return np.sqrt(np.sum(np.square(form - to)))
-
-def getDistOfHash(f, t):
-    return f[0].__sub__(t[0])
-
-def getDistOfCos(f, t):
-    up = np.sum(np.multiply(f, t))
-    ff = np.sqrt(np.sum(np.multiply(f, f)))
-    tt = np.sqrt(np.sum(np.multiply(t, t)))
-    down = ff * tt
-    return  up / down
-
-def getMinOfNum(a, K):
-    a = np.array(a)
-    return sorted(a, key=lambda a: a[0])[0:K]
-
-def removeAllSplits(path):
-    imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
-    print 'del Img: %s' % imgList
-    for i in imgList:
-        removeFile(os.path.join(path, i))
-
-
-def getImage(img):
-    img = np.swapaxes(img, 0, 2)
-    img = np.swapaxes(img, 1, 2)
-    img = img[np.newaxis, :]
-    return img
-
-def getFeatures(img, f_mod=None, transformer=None):
-    if is_caffe == False:
-        img = getImage(img)
-        f = f_mod.predict(img)
-        f = np.ravel(f)
-    else:
-        f_mod.blobs['data'].data[...] = getImage(img)     #执行上面设置的图片预处理操作，并将图片载入到blob中
-        out = f_mod.forward()
-        f = f_mod.blobs['pool5/7x7_s1'].data
-        f = np.ravel(f[0])
-        return f
-    return f
-
-def init(GPUid=0):
-    if is_caffe == False:
-        import mxnet as mx
-        model = mx.model.FeedForward.load(
-            prefix, num_round, ctx=mx.gpu(GPUid), numpy_batch_size=1)
-        internals = model.symbol.get_internals()
-        fea_symbol = internals[layer]
-        feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
-                                                arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
-
-        return feature_extractor
-    else:
-        import caffe
-        net = caffe.Net(deploy, caffe_model, 0)   #加载model和network
-        return net
-        
 
 def removeAllSpliteOfPath():
     subfolders = [folder for folder in os.listdir(
@@ -439,13 +436,18 @@ def resetRandom():
     np.save(os.path.join(path, test_name + '_train.npy'), tempList[int(num * test_ratio):])
 
 def spliteAllOfPath():
+    if is_feature_now:
+        mod = init()
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     print subfolders
     for imgDir in subfolders:
         t_time = time.time()
         print 'Start ImageDir: %s ' % os.path.join(path, imgDir)
-        splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
+        if is_feature_now:
+            splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage, mod=mod)
+        else:
+            splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
         print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path, imgDir), (time.time() - t_time))
 
 def runTest():
@@ -508,10 +510,12 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hb', ['knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
+        elif op == '-p':
+            is_feature_now = True
         elif op == '-h':
             resetTest = True
         elif op == '-v':
