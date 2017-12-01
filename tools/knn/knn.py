@@ -130,51 +130,51 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
             if os.path.exists(imgfile) == False:
                 print 'Bad Image: %s' % imgfile
                 continue
-            im = Image.open(imgfile)
-            w, h = im.size
-            im = im.crop((0, 0, w, int(h * 0.9)))
-            #dx = 224
-            for i in range(1, tilesPerImage + 1):
-                newname = imgfile.replace('.', '_{:03d}.'.format(i))
-                # print newname
+            with Image.open(imgfile) as im:
                 w, h = im.size
-                if w < 224:
-                        im = cv2.resize(im, (224, h))
-                w, h = im.size
-                if h < 224:
-                        im = cv2.resize(im, (w, 224))
-                w, h = im.size
+                im = im.crop((0, 0, w, int(h * 0.9)))
+                #dx = 224
+                for i in range(1, tilesPerImage + 1):
+                    newname = imgfile.replace('.', '_{:03d}.'.format(i))
+                    # print newname
+                    w, h = im.size
+                    if w < 224:
+                            im = cv2.resize(im, (224, h))
+                    w, h = im.size
+                    if h < 224:
+                            im = cv2.resize(im, (w, 224))
+                    w, h = im.size
 
-                # print("Cropping",w,h)
-                if i < 100 and w > 300:
-                    dx = 224
-                if 100 < i < 200 and w > 500:
-                    dx = 320
-                if 200 < i < 300 and w > 800:
-                    dx = 640
-                if i < 100 and h > 300:
-                    dy = 224
-                if 100 < i < 200 and h > 500:
-                    dy = 320
-                if 200 < i < 300 and h > 800:
-                    dy = 640
-                x = random.randint(0, w - dx - 1)
-                y = random.randint(0, h - dy - 1)
-                #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
-                im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
-                if i % 2 == 0:  # roate 180,90
-                    im_cropped = im_cropped.transpose(
-                        random.choice(rotateAction))
-                if i % 2 == 0 and i > 300:
-                    roate_drgree = random.choice(rotate45degree)
-                    im_cropped = im_crotate_image_square(
-                        im_cropped, roate_drgree)
-                if w != 0 and h != 0:
-                    # im_cropped.save(newname)
-                    im_cropped = cv2.resize(np.array(im_cropped), (224, 224))
-                    temp_list.append(im_cropped)
-            # don't remove startImg
-            # os.remove(imgfile)
+                    # print("Cropping",w,h)
+                    if i < 100 and w > 300:
+                        dx = 224
+                    if 100 < i < 200 and w > 500:
+                        dx = 320
+                    if 200 < i < 300 and w > 800:
+                        dx = 640
+                    if i < 100 and h > 300:
+                        dy = 224
+                    if 100 < i < 200 and h > 500:
+                        dy = 320
+                    if 200 < i < 300 and h > 800:
+                        dy = 640
+                    x = random.randint(0, w - dx - 1)
+                    y = random.randint(0, h - dy - 1)
+                    #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
+                    im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
+                    if i % 2 == 0:  # roate 180,90
+                        im_cropped = im_cropped.transpose(
+                            random.choice(rotateAction))
+                    if i % 2 == 0 and i > 300:
+                        roate_drgree = random.choice(rotate45degree)
+                        im_cropped = im_crotate_image_square(
+                            im_cropped, roate_drgree)
+                    if w != 0 and h != 0:
+                        # im_cropped.save(newname)
+                        im_cropped = cv2.resize(np.array(im_cropped), (224, 224))
+                        temp_list.append(im_cropped)
+                # don't remove startImg
+                # os.remove(imgfile)
         print 'Save %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
         np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
     return fold
