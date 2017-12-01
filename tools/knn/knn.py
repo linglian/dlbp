@@ -259,12 +259,16 @@ def load_all_beOne(path, test_ratio=0.02):
                 continue
             t_time = time.time()
             testNum += len(imgArray)
+            temp_list = []
             for i in imgArray:
-                main_imgArray.append([getFeatures(i, mod), file, file2])
+                tim = getFeatures(i, mod)
+                temp_list.append([tim, file, file2])
+                main_imgArray.append([tim, file, file2])
                 n += 1
                 if n % reportTime == 0:
                     print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
                     t_time = time.time()
+            np.save(os.path.join(filepath2, 'main_feature_knn.npy'), temp_list)
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
