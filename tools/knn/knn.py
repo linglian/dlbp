@@ -347,7 +347,7 @@ def removeAllSpliteOfPath():
             removeAllSplits(os.path.join(path2, file2))
             print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
 
-    def loadFeature():
+def loadFeature():
     test = np.load(os.path.join(path, knn_name + '_test.npy'))
     train = np.load(os.path.join(path, knn_name + '_train.npy'))
     testNum = len(test)
