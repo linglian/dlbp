@@ -239,6 +239,9 @@ def load_all_beOne(path, test_ratio=0.02):
     main_imgArray = []
     per = 0
     print 'Start Merge Npy'
+    mod = init()
+    n = 0
+    testNum = 0
     for file in subfolders:
         filepath = os.path.join(path, file)
         print 'Start Merge Npy %s' % filepath
@@ -253,8 +256,18 @@ def load_all_beOne(path, test_ratio=0.02):
             # print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' % os.path.join(filepath2, knn_name + '.npy'))
+                continue
+            testList = []
+            t_time = time.time()
+            testNum += len(imgArray)
             for i in imgArray:
-                main_imgArray.append(i)
+                main_imgArray.append([getFeatures(i[0], mod), i[1], i[2]])
+                testList.append([getFeatures(i[0], mod), i[1], i[2]])
+                n += 1
+                if n % 1 == 0:
+                    print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
+                    t_time = time.time()
+            np.save(os.path.join(filepath2, 'feature_knn.npy'), testList)
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     random.shuffle(main_imgArray)
     return main_imgArray[:int(len(main_imgArray) * test_ratio)], main_imgArray[int(len(main_imgArray) * test_ratio):]
@@ -372,13 +385,9 @@ def loadFeature():
         n += 1
         if n % 1 == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
-            t_time = time.time()
-    if is_caffe == False:
-        np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_test.npy'), testList)
-        np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_train.npy'), trainList)
-    else:
-        np.save(os.path.join(path, 'caffe_feature_test.npy'), testList)
-        np.save(os.path.join(path, 'caffe_feature_train.npy'), trainList)
+        t_time = time.time()
+    np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_test.npy'), testList)
+    np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_train.npy'), trainList)
     print 'End Feature: Speed Time %f' % (time.time() - m_t)
 
 
@@ -568,9 +577,9 @@ if __name__ == '__main__':
             print 'Size: %d' % (len(test) + len(train))
         elif op == '-l':
             test, train = load_all_beOne(path, test_ratio=test_ratio)
-            print 'Save %s' % os.path.join(path, knn_name + '_test.npy')
-            np.save(os.path.join(path, knn_name + '_test.npy'), test)
-            print 'Save %s' % os.path.join(path, knn_name + '_train.npy')
-            np.save(os.path.join(path, knn_name + '_train.npy'), train)
+            print 'Save %s' % os.path.join(path, knn_name + '_feature_test.npy')
+            np.save(os.path.join(path, knn_name + '_feature_test.npy'), test)
+            print 'Save %s' % os.path.join(path, knn_name + '_feature_train.npy')
+            np.save(os.path.join(path, knn_name + '_feature_train.npy'), train)
         elif op == '-t':
             runTest()
