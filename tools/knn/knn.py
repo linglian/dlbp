@@ -122,8 +122,14 @@ def splits_resamples(facescrub_root, tilesPerImage=360):
                      for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
         print 'Start Directory: %s' % subfolder
         temp_list = []
+        if os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
+            print 'Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
+            continue
         for imgfile in imgsfiles:
             print 'Start Image: %s' % imgfile
+            if os.path.exists(imgfile) == False:
+                print 'Bad Image: %s' % imgfile
+                continue
             im = Image.open(imgfile)
             w, h = im.size
             im = im.crop((0, 0, w, int(h * 0.9)))
