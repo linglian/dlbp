@@ -241,6 +241,7 @@ def load_all_beOne(path, test_ratio=0.02):
     print 'Start Merge Npy'
     for file in subfolders:
         filepath = os.path.join(path, file)
+        print 'Start Merge Npy %s' % filepath
         subfolders2 = [folder for folder in os.listdir(
             filepath) if os.path.isdir(os.path.join(filepath, folder))]
         print subfolders2
@@ -249,7 +250,7 @@ def load_all_beOne(path, test_ratio=0.02):
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             imgArray = np.load(os.path.join(filepath2, knn_name + '.npy'))
-            print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
+            # print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' % os.path.join(filepath2, knn_name + '.npy'))
             for i in imgArray:
@@ -346,7 +347,7 @@ def removeAllSpliteOfPath():
             removeAllSplits(os.path.join(path2, file2))
             print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
 
-def loadFeature():
+    def loadFeature():
     test = np.load(os.path.join(path, knn_name + '_test.npy'))
     train = np.load(os.path.join(path, knn_name + '_train.npy'))
     testNum = len(test)
@@ -567,7 +568,9 @@ if __name__ == '__main__':
             print 'Size: %d' % (len(test) + len(train))
         elif op == '-l':
             test, train = load_all_beOne(path, test_ratio=test_ratio)
+            print 'Save %s' % os.path.join(path, knn_name + '_test.npy')
             np.save(os.path.join(path, knn_name + '_test.npy'), test)
+            print 'Save %s' % os.path.join(path, knn_name + '_train.npy')
             np.save(os.path.join(path, knn_name + '_train.npy'), train)
         elif op == '-t':
             runTest()
