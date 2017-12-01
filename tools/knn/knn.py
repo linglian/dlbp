@@ -262,7 +262,7 @@ def load_all_beOne(path, test_ratio=0.02):
             for i in imgArray:
                 main_imgArray.append([getFeatures(i, mod), file, file2])
                 n += 1
-                if n % 1 == 0:
+                if n % reportTime == 0:
                     print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
                     t_time = time.time()
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
@@ -371,7 +371,7 @@ def loadFeature():
     for i in test:
         testList.append([getFeatures(i[0], mod), i[1], i[2]])
         n += 1
-        if n % 1 == 0:
+        if n % reportTime == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
             t_time = time.time()
     trainList = []
@@ -380,7 +380,7 @@ def loadFeature():
     for i in train:
         trainList.append([getFeatures(i[0], mod), i[1], i[2]])
         n += 1
-        if n % 1 == 0:
+        if n % reportTime == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
         t_time = time.time()
     np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_test.npy'), testList)
