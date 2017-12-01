@@ -582,9 +582,9 @@ if __name__ == '__main__':
             print 'Size: %d' % (len(test) + len(train))
         elif op == '-l':
             test, train = load_all_beOne(path, test_ratio=test_ratio)
-            print 'Save %s' % os.path.join(path, knn_name + '_feature_test.npy')
-            np.save(os.path.join(path, knn_name + '_feature_test.npy'), test)
-            print 'Save %s' % os.path.join(path, knn_name + '_feature_train.npy')
-            np.save(os.path.join(path, knn_name + '_feature_train.npy'), train)
+            print 'Save %s' % os.path.join(path, knn_name + '_test.npy')
+            np.save(os.path.join(path, knn_name + '_test.npy'), test)
+            print 'Save %s' % os.path.join(path, knn_name + '_train.npy')
+            np.save(os.path.join(path, knn_name + '_train.npy'), train)
         elif op == '-t':
             runTest()
