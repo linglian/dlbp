@@ -504,7 +504,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['text=', 'train=', 'knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['test=', 'train=', 'knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -528,7 +528,7 @@ if __name__ == '__main__':
             layer = value
         elif op == '--knn_name':
             knn_name = value
-        elif op == '--text':
+        elif op == '--test':
             test_file_name = value
         elif op == '--train':
             train_file_name = value

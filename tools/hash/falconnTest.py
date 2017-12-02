@@ -34,6 +34,8 @@ ks = {}
 k = 1
 is_pool = True
 dim = 2048
+test_file_name = 'knn_test.npy'
+train_file_name = 'knn_train.npy'
 
 def resetRandom():
     import random
@@ -63,8 +65,8 @@ def runTest():
     for main_times in range(0, times):
         if resetTest:
             resetRandom()
-        test = np.load(os.path.join(path, test_name + '_test.npy'))
-        train = np.load(os.path.join(path, test_name + '_train.npy'))
+        test = np.load(os.path.join(path, test_file_name))
+        train = np.load(os.path.join(path, train_file_name))
         testNum = len(test)
         trainNum = len(train)
         p = falconn.get_default_parameters(trainNum, dim)
@@ -120,7 +122,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hbd:', ['time=', 'dist=', 'report=', 'size', 'log'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hbd:', ['test=', 'train=','time=', 'dist=', 'report=', 'size', 'log'])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -132,6 +134,10 @@ if __name__ == '__main__':
             test_name = value
         elif op == '--log':
             is_log = True
+        elif op == '--test':
+            test_file_name = value
+        elif op == '--train':
+            train_file_name = value
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
