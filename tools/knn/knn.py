@@ -49,6 +49,8 @@ layer = 'pool1_output'
 knn_name = 'knn'
 is_feature_now = False
 is_init_mod = False
+test_file_name = 'knn_test.npy'
+train_file_name = 'knn_train.npy'
 
 def getDistances(f, t, type=1):
     if type == 1:
@@ -94,16 +96,9 @@ def getImage(img):
     return img
 
 def getFeatures(img, f_mod=None, transformer=None):
-    if is_caffe == False:
-        img = getImage(img)
-        f = f_mod.predict(img)
-        f = np.ravel(f)
-    else:
-        f_mod.blobs['data'].data[...] = getImage(img)     #执行上面设置的图片预处理操作，并将图片载入到blob中
-        out = f_mod.forward()
-        f = f_mod.blobs['pool5/7x7_s1'].data
-        f = np.ravel(f[0])
-        return f
+    img = getImage(img)
+    f = f_mod.predict(img)
+    f = np.ravel(f)
     return f
 
 def init(GPUid=0):
@@ -312,7 +307,6 @@ def load_all_beOne(path, test_ratio=0.02):
     main_imgArray = []
     per = 0
     print 'Start Merge Npy'
-    mod = init()
     n = 0
     testNum = 0
     for file in subfolders:
@@ -457,8 +451,8 @@ def runTest():
     for main_times in range(0, times):
         if resetTest:
             resetRandom()
-        test = np.load(os.path.join(path, test_name + '_test.npy'))
-        train = np.load(os.path.join(path, test_name + '_train.npy'))
+        test = np.load(os.path.join(path, test_file_name))
+        train = np.load(os.path.join(path, train_file_name))
         testNum = len(test)
         trainNum = len(train)
         m_t = time.time()
@@ -510,7 +504,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['text=', 'train=', 'knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -534,6 +528,10 @@ if __name__ == '__main__':
             layer = value
         elif op == '--knn_name':
             knn_name = value
+        elif op == '--text':
+            test_file_name = value
+        elif op == '--train':
+            train_file_name = value
         elif op == '--caffe_path':
             caffe_path = value
             sys.path.insert(0, caffe_path)
