@@ -190,8 +190,10 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
             print 'Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
             continue
+        temp_time = time.time()
         for imgfile in imgsfiles:
-            print 'Start Image: %s' % imgfile
+            print 'Start Image: %s SpeedTime: %0.2f' % (imgfile, (time.time() - temp_time))
+            temp_time = time.time()
             if os.path.exists(imgfile) == False:
                 print 'Bad Image: %s' % imgfile
                 continue
