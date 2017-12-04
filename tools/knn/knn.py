@@ -212,17 +212,17 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                     w, h = im.size
 
                     # print("Cropping",w,h)
-                    if i < 100 and w > 300:
+                    if i < (tilesPerImage / 360) * 100 and w > 300:
                         dx = 224
-                    if 100 < i < 200 and w > 500:
+                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
                         dx = 320
-                    if 200 < i < 300 and w > 800:
+                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
                         dx = 640
-                    if i < 100 and h > 300:
+                    if i < (tilesPerImage / 360) * 100 and h > 300:
                         dy = 224
-                    if 100 < i < 200 and h > 500:
+                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
                         dy = 320
-                    if 200 < i < 300 and h > 800:
+                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
                         dy = 640
                     x = random.randint(0, w - dx - 1)
                     y = random.randint(0, h - dy - 1)
@@ -231,7 +231,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                     if i % 2 == 0:  # roate 180,90
                         im_cropped = im_cropped.transpose(
                             random.choice(rotateAction))
-                    if i % 2 == 0 and i > 300:
+                    if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
                         roate_drgree = random.choice(rotate45degree)
                         im_cropped = im_crotate_image_square(
                             im_cropped, roate_drgree)
