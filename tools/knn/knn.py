@@ -8,6 +8,7 @@ import sys
 sys.path.append('/home/lol/anaconda2/lib/python2.7/site-packages')
 import imagehash as ih
 from PIL import Image
+import multiprocessing
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -137,6 +138,8 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     import random
     import math
 
+    t_time = time.time()
+    print 'Start ImageDir: %s ' % facescrub_root
     fold = facescrub_root
     print fold
 
@@ -253,6 +256,8 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                 im = im
         print 'Save %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
         np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
+    
+    print 'End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time))
     return fold
 
 def load_all_img(path, not_double=True):
@@ -431,20 +436,34 @@ def resetRandom():
     np.save(os.path.join(path, test_name + '_test.npy'), tempList[:int(num * test_ratio)])
     np.save(os.path.join(path, test_name + '_train.npy'), tempList[int(num * test_ratio):])
 
-def spliteAllOfPath():
+def spliteAllOfPath():		   
     if is_feature_now:
         mod = init()
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     print subfolders
+    jobs   =[]
+    z = 0
     for imgDir in subfolders:
-        t_time = time.time()
-        print 'Start ImageDir: %s ' % os.path.join(path, imgDir)
         if is_feature_now:
-            splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage, mod=mod)
+            mp_kwargs = dict(
+            facescrub_root=os.path.join(path, imgDir),
+            tilesPerImage=tilesPerImage,
+            mod=mod			
+            )
         else:
-            splits_resamples(os.path.join(path, imgDir), tilesPerImage = tilesPerImage)
-        print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path, imgDir), (time.time() - t_time))
+            mp_kwargs = dict(
+            facescrub_root=os.path.join(path, imgDir),
+            tilesPerImage=tilesPerImage,
+            )
+        p = multiprocessing.Process(target=splits_resamples, kwargs=mp_kwargs)
+        p.start()
+        z += 1
+        print "##################go to next index,start process for:",z," process"		   
+        jobs.append(p)
+    for p in jobs:
+           print "end of process"	
+           p.join()
 
 def runTest():
     m_bad = 0
