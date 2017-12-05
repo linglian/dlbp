@@ -268,6 +268,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
             np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
 
     job = []
+    logging.info('Has Cpu Number: %d' % cpu_number)
     cut = int(len(subfolders) / cpu_number)
     for i in range(0, cpu_number):
         start = cut * i
@@ -279,6 +280,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         )
         p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
         job.append(p)
+        logging.info('########Process %d Start' % i)
         p.start()
     if end != len(subfolders):
         start = end
@@ -293,6 +295,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         p.start()
     for j in job:
         j.join()
+        logging.info('########Process %s End' % j)
     logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
 
