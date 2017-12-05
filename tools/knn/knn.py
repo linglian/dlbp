@@ -9,6 +9,10 @@ sys.path.append('/home/lol/anaconda2/lib/python2.7/site-packages')
 import imagehash as ih
 from PIL import Image
 import multiprocessing
+from PIL import Image
+import random
+import math
+
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -53,7 +57,10 @@ is_init_mod = False
 test_file_name = 'knn_test.npy'
 train_file_name = 'knn_train.npy'
 cpu_number = 4
-
+rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
+                Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
+rotate45degree = [45, 135, 270]
+thresholdGLOABL = 0.42
 
 def getDistances(f, t, type=1):
     if type == 1:
@@ -144,14 +151,104 @@ def getHash(img):
     im = Image.fromarray(img)
     return ih.average_hash(im, 8)
 
+def sayHello(a, b):
+    print 'Hello'
+
+def im_crotate_image_square(im, deg):
+    im2 = im.rotate(deg, expand=1)
+    im = im.rotate(deg, expand=0)
+
+    width, height = im.size
+    if width == height:
+        im = im.crop((0, 0, width, int(height * 0.9)))
+        width, height = im.size
+
+    rads = math.radians(deg)
+    new_width = width - (im2.size[0] - width)
+
+    left = top = int((width - new_width) / 2)
+    right = bottom = int((width + new_width) / 2)
+
+    return im.crop((left, top, right, bottom))
+
+def temp_Process(subfolders, fold):
+    print 12321321
+    for subfolder in subfolders:
+        imgsfiles = [os.path.join(fold, subfolder, img)
+                        for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
+        logging.info('Start Directory: %s' % subfolder)
+        temp_list = []
+        if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
+            logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+            continue
+        temp_time = time.time()
+        for imgfile in imgsfiles:
+            if os.path.exists(imgfile) == False:
+                logging.error('Bad Image: %s' % imgfile)
+                continue
+            try:
+                im = Image.open(imgfile)
+                w, h = im.size
+                im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
+                #dx = 224
+
+                dx = dy = 224
+                for i in range(1, tilesPerImage + 1):
+                    newname = imgfile.replace('.', '_{:03d}.'.format(i))
+                    # print newname
+                    w, h = im.size
+                    if w < 224:
+                        im = cv2.resize(im, (224, h))
+                    w, h = im.size
+                    if h < 224:
+                        im = cv2.resize(im, (w, 224))
+                    w, h = im.size
+
+                    # print("Cropping",w,h)
+                    if i < (tilesPerImage / 360) * 100 and w > 300:
+                        dx = 224
+                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
+                        dx = 320
+                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
+                        dx = 640
+                    if i < (tilesPerImage / 360) * 100 and h > 300:
+                        dy = 224
+                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
+                        dy = 320
+                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
+                        dy = 640
+                    x = random.randint(0, w - dx - 1)
+                    y = random.randint(0, h - dy - 1)
+                    #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
+                    im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
+                    if i % 2 == 0:  # roate 180,90
+                        im_cropped = im_cropped.transpose(
+                            random.choice(rotateAction))
+                    if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
+                        roate_drgree = random.choice(rotate45degree)
+                        im_cropped = im_crotate_image_square(
+                            im_cropped, roate_drgree)
+                    if w != 0 and h != 0:
+                        # im_cropped.save(newname)
+                        im_cropped = cv2.resize(
+                            np.array(im_cropped), (224, 224))
+                        if is_feature_now == False:
+                            temp_list.append(
+                                [im_cropped, subfolder, newname])
+                        else:
+                            temp_list.append(
+                                [getFeatures(im_cropped, mod), subfolder, newname])
+                # don't remove startImg
+                # os.remove(imgfile)
+            except IOError:
+                logging.error('Bad Image: %s' % imgfile)
+                continue
+        logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
+        np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
+    return 'Good Ending %s    %s' % (fold, subfolders)
 
 def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     #import sklearn
-    thresholdGLOABL = 0.42
-    from PIL import Image
-    import random
-    import math
-
     t_time = time.time()
     # logging.info('Start ImageDir: %s ' % facescrub_root)
     fold = facescrub_root
@@ -168,134 +265,29 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         for img in imgsfiles:
             temp_dict[img] = subfolder
 
-    def im_crotate_image_square(im, deg):
-        im2 = im.rotate(deg, expand=1)
-        im = im.rotate(deg, expand=0)
-
-        width, height = im.size
-        if width == height:
-            im = im.crop((0, 0, width, int(height * 0.9)))
-            width, height = im.size
-
-        rads = math.radians(deg)
-        new_width = width - (im2.size[0] - width)
-
-        left = top = int((width - new_width) / 2)
-        right = bottom = int((width + new_width) / 2)
-
-        return im.crop((left, top, right, bottom))
-
-    fold_idx = 1
-    rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
-                    Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
-
-    rotate45degree = [45, 135, 270]
     subfolders = [folder for folder in os.listdir(
         fold) if os.path.isdir(os.path.join(fold, folder))]
 
-    def temp_Process(subfolders, fold):
-        for subfolder in subfolders:
-            imgsfiles = [os.path.join(fold, subfolder, img)
-                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-            # logging.info('Start Directory: %s' % subfolder)
-            temp_list = []
-            if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-                # logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
-                continue
-            temp_time = time.time()
-            for imgfile in imgsfiles:
-                if os.path.exists(imgfile) == False:
-                    logging.error('Bad Image: %s' % imgfile)
-                    continue
-                try:
-                    im = Image.open(imgfile)
-                    w, h = im.size
-                    im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
-                    #dx = 224
-
-                    dx = dy = 224
-                    for i in range(1, tilesPerImage + 1):
-                        newname = imgfile.replace('.', '_{:03d}.'.format(i))
-                        # print newname
-                        w, h = im.size
-                        if w < 224:
-                            im = cv2.resize(im, (224, h))
-                        w, h = im.size
-                        if h < 224:
-                            im = cv2.resize(im, (w, 224))
-                        w, h = im.size
-
-                        # print("Cropping",w,h)
-                        if i < (tilesPerImage / 360) * 100 and w > 300:
-                            dx = 224
-                        if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
-                            dx = 320
-                        if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
-                            dx = 640
-                        if i < (tilesPerImage / 360) * 100 and h > 300:
-                            dy = 224
-                        if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
-                            dy = 320
-                        if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
-                            dy = 640
-                        x = random.randint(0, w - dx - 1)
-                        y = random.randint(0, h - dy - 1)
-                        #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
-                        im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
-                        if i % 2 == 0:  # roate 180,90
-                            im_cropped = im_cropped.transpose(
-                                random.choice(rotateAction))
-                        if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
-                            roate_drgree = random.choice(rotate45degree)
-                            im_cropped = im_crotate_image_square(
-                                im_cropped, roate_drgree)
-                        if w != 0 and h != 0:
-                            # im_cropped.save(newname)
-                            im_cropped = cv2.resize(
-                                np.array(im_cropped), (224, 224))
-                            if is_feature_now == False:
-                                temp_list.append(
-                                    [im_cropped, subfolder, newname])
-                            else:
-                                temp_list.append(
-                                    [getFeatures(im_cropped, mod), subfolder, newname])
-                    # don't remove startImg
-                    # os.remove(imgfile)
-                except IOError:
-                    logging.error('Bad Image: %s' % imgfile)
-                    continue
-            logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
-            np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
-
-    job = []
     logging.info('Has Cpu Number: %d' % cpu_number)
     cut = int(len(subfolders) / cpu_number)
-    for i in range(0, cpu_number):
+    pool = multiprocessing.Pool(processes=cpu_number)
+    result = []
+    for i in range(0, cpu_number - 1):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        mp_kwargs = dict(
-            subfolders=subfolders[start:end],
-            fold=fold
-        )
-        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
-        job.append(p)
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold)))
         logging.info('########Process %d Start' % i)
-        p.start()
     if end != len(subfolders):
         start = end
         end = len(subfolders)
-        print subfolders[start:end]
-        mp_kwargs = dict(
-            subfolders=subfolders[start:end],
-            fold=fold
-        )
-        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
-        job.append(p)
-        p.start()
-    for j in job:
-        j.join()
-        logging.info('########Process %s End' % j)
+        logging.info(subfolders[start:end])
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold)))
+        logging.info('########Process %d Start' % cpu_number)
+    pool.close()
+    pool.join()
+    for i in result:
+        logging.info(i.get())
     logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
 
