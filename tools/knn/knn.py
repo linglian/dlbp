@@ -153,7 +153,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     import math
 
     t_time = time.time()
-    logging.info('Start ImageDir: %s ' % facescrub_root)
+    # logging.info('Start ImageDir: %s ' % facescrub_root)
     fold = facescrub_root
 
     subfolders = [folder for folder in os.listdir(
@@ -197,10 +197,10 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         for subfolder in subfolders:
             imgsfiles = [os.path.join(fold, subfolder, img)
                          for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-            logging.info('Start Directory: %s' % subfolder)
+            # logging.info('Start Directory: %s' % subfolder)
             temp_list = []
             if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-                logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+                # logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
                 continue
             temp_time = time.time()
             for imgfile in imgsfiles:
@@ -488,7 +488,6 @@ def spliteAllOfPath():
         mod = init()
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
-    print subfolders
     for imgDir in subfolders:
         if is_feature_now:
             splits_resamples(facescrub_root=os.path.join(path, imgDir),
