@@ -171,8 +171,7 @@ def im_crotate_image_square(im, deg):
 
     return im.crop((left, top, right, bottom))
 
-def temp_Process(subfolders, fold):
-    print 12321321
+def temp_Process(subfolders, fold, mod):
     for subfolder in subfolders:
         imgsfiles = [os.path.join(fold, subfolder, img)
                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
@@ -276,13 +275,13 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold)))
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
         logging.info('########Process %d Start' % i)
     if end != len(subfolders):
         start = end
         end = len(subfolders)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold)))
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
         logging.info('########Process %d Start' % cpu_number)
     pool.close()
     pool.join()
