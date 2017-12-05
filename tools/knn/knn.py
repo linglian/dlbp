@@ -153,7 +153,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     import math
 
     t_time = time.time()
-    logging.Info('Start ImageDir: %s ' % facescrub_root)
+    logging.info('Start ImageDir: %s ' % facescrub_root)
     fold = facescrub_root
 
     subfolders = [folder for folder in os.listdir(
@@ -197,10 +197,10 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         for subfolder in subfolders:
             imgsfiles = [os.path.join(fold, subfolder, img)
                          for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-            logging.Info('Start Directory: %s' % subfolder)
+            logging.info('Start Directory: %s' % subfolder)
             temp_list = []
             if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-                logging.Info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+                logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
                 continue
             temp_time = time.time()
             for imgfile in imgsfiles:
@@ -264,7 +264,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                 except IOError:
                     logging.error('Bad Image: %s' % imgfile)
                     continue
-            logging.Info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
+            logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
             np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
 
     job = []
@@ -272,7 +272,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     for i in range(0, cpu_number):
         start = cut * i
         end = cut * (i + 1)
-        logging.Info(subfolders[start:end])
+        logging.info(subfolders[start:end])
         mp_kwargs = dict(
             subfolders=subfolders[start:end],
             fold=fold
@@ -293,7 +293,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         p.start()
     for j in job:
         j.join()
-    logging.Info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
+    logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
 
 def load_all_img(path, not_double=True):
