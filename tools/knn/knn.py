@@ -204,8 +204,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                 continue
             temp_time = time.time()
             for imgfile in imgsfiles:
-                print 'Start Image % s' % imgfile
-                temp_time = time.time()
                 if os.path.exists(imgfile) == False:
                     print 'Bad Image: %s' % imgfile
                     continue
@@ -266,7 +264,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
                 except IOError:
                     print 'Bad Image: %s' % imgfile
                     continue
-                print 'Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time))
+            print 'Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time))
             np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
 
     job = []
@@ -297,7 +295,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         j.join()
     print 'End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time))
     return fold
-
 
 def load_all_img(path, not_double=True):
     import time
