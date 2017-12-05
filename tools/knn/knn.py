@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 import numpy as np
 import os
 import time
@@ -12,10 +12,10 @@ import multiprocessing
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
-                format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='test.log',
-                filemode='w')
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S',
+                    filename='test.log',
+                    filemode='w')
 
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
@@ -44,14 +44,16 @@ prefix = "full-resnet-152"
 is_caffe = False
 caffe_path = '/home/lol/dl/caffe/python'
 sys.path.insert(0, caffe_path)
-deploy='./deploy.prototxt'    #deploy文件
-caffe_model='./bvlc_googlenet.caffemodel'   #训练好的 caffemodel
+deploy = './deploy.prototxt'  # deploy文件
+caffe_model = './bvlc_googlenet.caffemodel'  # 训练好的 caffemodel
 layer = 'pool1_output'
 knn_name = 'knn'
 is_feature_now = False
 is_init_mod = False
 test_file_name = 'knn_test.npy'
 train_file_name = 'knn_train.npy'
+cpu_number = 4
+
 
 def getDistances(f, t, type=1):
     if type == 1:
@@ -63,28 +65,35 @@ def getDistances(f, t, type=1):
     elif type == 4:
         return 1.0 - getDistOfCos(f, t)
 
+
 def getDistOfL2(form, to):
     return cv2.norm(form, to, normType=cv2.NORM_L2)
+
 
 def getDistOfSquare(form, to):
     return np.sqrt(np.sum(np.square(form - to)))
 
+
 def getDistOfHash(f, t):
     return f[0].__sub__(t[0])
+
 
 def getDistOfCos(f, t):
     up = np.sum(np.multiply(f, t))
     ff = np.sqrt(np.sum(np.multiply(f, f)))
     tt = np.sqrt(np.sum(np.multiply(t, t)))
     down = ff * tt
-    return  up / down
+    return up / down
+
 
 def getMinOfNum(a, K):
     a = np.array(a)
     return sorted(a, key=lambda a: a[0])[0:K]
 
+
 def removeAllSplits(path):
-    imgList = [img for img in os.listdir(path) if img.endswith('.JPG') and img.find('_') > 0]
+    imgList = [img for img in os.listdir(
+        path) if img.endswith('.JPG') and img.find('_') > 0]
     print 'del Img: %s' % imgList
     for i in imgList:
         removeFile(os.path.join(path, i))
@@ -96,11 +105,13 @@ def getImage(img):
     img = img[np.newaxis, :]
     return img
 
+
 def getFeatures(img, f_mod=None, transformer=None):
     img = getImage(img)
     f = f_mod.predict(img)
     f = np.ravel(f)
     return f
+
 
 def init(GPUid=0):
     import mxnet as mx
@@ -109,10 +120,11 @@ def init(GPUid=0):
     internals = model.symbol.get_internals()
     fea_symbol = internals[layer]
     feature_extractor = mx.model.FeedForward(ctx=mx.gpu(GPUid), symbol=fea_symbol, numpy_batch_size=1,
-                                            arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
+                                             arg_params=model.arg_params, aux_params=model.aux_params, allow_extra_params=True)
     init_mod = feature_extractor
     return feature_extractor
-        
+
+
 def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
@@ -127,9 +139,11 @@ def removeFile(name):
     if os.path.exists(name):
         os.remove(name)
 
+
 def getHash(img):
     im = Image.fromarray(img)
     return ih.average_hash(im, 8)
+
 
 def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     #import sklearn
@@ -141,21 +155,18 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     t_time = time.time()
     print 'Start ImageDir: %s ' % facescrub_root
     fold = facescrub_root
-    print fold
 
     subfolders = [folder for folder in os.listdir(
         facescrub_root) if os.path.isdir(os.path.join(facescrub_root, folder))]
-    print subfolders
 
-    dict = {}
+    temp_dict = {}
     for subfolder in subfolders:
         removeFile(os.path.join(facescrub_root, subfolder, 'test.npy'))
         removeFile(os.path.join(facescrub_root, subfolder, 'train.npy'))
         imgsfiles = [os.path.join(facescrub_root, subfolder, img)
                      for img in os.listdir(os.path.join(facescrub_root, subfolder)) if img.endswith('.JPG')]
         for img in imgsfiles:
-            dict[img] = subfolder
-    print dict
+            temp_dict[img] = subfolder
 
     def im_crotate_image_square(im, deg):
         im2 = im.rotate(deg, expand=1)
@@ -163,7 +174,7 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
 
         width, height = im.size
         if width == height:
-            im = im.crop((0, 0, w, int(h * 0.9)))
+            im = im.crop((0, 0, width, int(height * 0.9)))
             width, height = im.size
 
         rads = math.radians(deg)
@@ -174,8 +185,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
 
         return im.crop((left, top, right, bottom))
 
-
-    dx = dy = 224
     fold_idx = 1
     rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
                     Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
@@ -183,82 +192,112 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     rotate45degree = [45, 135, 270]
     subfolders = [folder for folder in os.listdir(
         fold) if os.path.isdir(os.path.join(fold, folder))]
-    print 'files: %s' % subfolders
 
-    for subfolder in subfolders:
-        imgsfiles = [os.path.join(fold, subfolder, img)
-                     for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-        print 'Start Directory: %s' % subfolder
-        temp_list = []
-        if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-            print 'Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
-            continue
-        temp_time = time.time()
-        for imgfile in imgsfiles:
-            print 'Start Image: %s SpeedTime: %0.2f' % (imgfile, (time.time() - temp_time))
+    def temp_Process(subfolders, fold):
+        for subfolder in subfolders:
+            imgsfiles = [os.path.join(fold, subfolder, img)
+                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
+            print 'Start Directory: %s' % subfolder
+            temp_list = []
+            if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
+                print 'Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
+                continue
             temp_time = time.time()
-            if os.path.exists(imgfile) == False:
-                print 'Bad Image: %s' % imgfile
-                continue
-            try:
-                im = Image.open(imgfile)
-                w, h = im.size
-                im = im.crop((0, 0, w, int(h * 0.9)))
-                #dx = 224
-                for i in range(1, tilesPerImage + 1):
-                    newname = imgfile.replace('.', '_{:03d}.'.format(i))
-                    # print newname
+            for imgfile in imgsfiles:
+                print 'Start Image % s' % imgfile
+                temp_time = time.time()
+                if os.path.exists(imgfile) == False:
+                    print 'Bad Image: %s' % imgfile
+                    continue
+                try:
+                    im = Image.open(imgfile)
                     w, h = im.size
-                    if w < 224:
-                            im = cv2.resize(im, (224, h))
-                    w, h = im.size
-                    if h < 224:
-                            im = cv2.resize(im, (w, 224))
-                    w, h = im.size
+                    im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
+                    #dx = 224
 
-                    # print("Cropping",w,h)
-                    if i < (tilesPerImage / 360) * 100 and w > 300:
-                        dx = 224
-                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
-                        dx = 320
-                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
-                        dx = 640
-                    if i < (tilesPerImage / 360) * 100 and h > 300:
-                        dy = 224
-                    if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
-                        dy = 320
-                    if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
-                        dy = 640
-                    x = random.randint(0, w - dx - 1)
-                    y = random.randint(0, h - dy - 1)
-                    #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
-                    im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
-                    if i % 2 == 0:  # roate 180,90
-                        im_cropped = im_cropped.transpose(
-                            random.choice(rotateAction))
-                    if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
-                        roate_drgree = random.choice(rotate45degree)
-                        im_cropped = im_crotate_image_square(
-                            im_cropped, roate_drgree)
-                    if w != 0 and h != 0:
-                        # im_cropped.save(newname)
-                        im_cropped = cv2.resize(np.array(im_cropped), (224, 224))
-                        if is_feature_now == False:
-                            temp_list.append(im_cropped)
-                        else:
-                            temp_list.append([getFeatures(im_cropped, mod), subfolder, newname])
-                # don't remove startImg
-                # os.remove(imgfile)
-            except IOError:
-                print 'Bad Image: %s' % imgfile
-                continue
-            else:
-                im = im
-        print 'Save %s' % os.path.join(fold, subfolder, 'knn_splite.npy')
-        np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
-    
+                    dx = dy = 224
+                    for i in range(1, tilesPerImage + 1):
+                        newname = imgfile.replace('.', '_{:03d}.'.format(i))
+                        # print newname
+                        w, h = im.size
+                        if w < 224:
+                            im = cv2.resize(im, (224, h))
+                        w, h = im.size
+                        if h < 224:
+                            im = cv2.resize(im, (w, 224))
+                        w, h = im.size
+
+                        # print("Cropping",w,h)
+                        if i < (tilesPerImage / 360) * 100 and w > 300:
+                            dx = 224
+                        if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
+                            dx = 320
+                        if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
+                            dx = 640
+                        if i < (tilesPerImage / 360) * 100 and h > 300:
+                            dy = 224
+                        if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
+                            dy = 320
+                        if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
+                            dy = 640
+                        x = random.randint(0, w - dx - 1)
+                        y = random.randint(0, h - dy - 1)
+                        #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
+                        im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
+                        if i % 2 == 0:  # roate 180,90
+                            im_cropped = im_cropped.transpose(
+                                random.choice(rotateAction))
+                        if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
+                            roate_drgree = random.choice(rotate45degree)
+                            im_cropped = im_crotate_image_square(
+                                im_cropped, roate_drgree)
+                        if w != 0 and h != 0:
+                            # im_cropped.save(newname)
+                            im_cropped = cv2.resize(
+                                np.array(im_cropped), (224, 224))
+                            if is_feature_now == False:
+                                temp_list.append(
+                                    [im_cropped, subfolder, newname])
+                            else:
+                                temp_list.append(
+                                    [getFeatures(im_cropped, mod), subfolder, newname])
+                    # don't remove startImg
+                    # os.remove(imgfile)
+                except IOError:
+                    print 'Bad Image: %s' % imgfile
+                    continue
+                print 'Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time))
+            np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
+
+    job = []
+    cut = int(len(subfolders) / cpu_number)
+    for i in range(0, cpu_number):
+        start = cut * i
+        end = cut * (i + 1)
+        print subfolders[start:end]
+        mp_kwargs = dict(
+            subfolders=subfolders[start:end],
+            fold=fold
+        )
+        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
+        job.append(p)
+        p.start()
+    if end != len(subfolders):
+        start = end
+        end = len(subfolders)
+        print subfolders[start:end]
+        mp_kwargs = dict(
+            subfolders=subfolders[start:end],
+            fold=fold
+        )
+        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
+        job.append(p)
+        p.start()
+    for j in job:
+        j.join()
     print 'End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time))
     return fold
+
 
 def load_all_img(path, not_double=True):
     import time
@@ -329,7 +368,8 @@ def load_all_beOne(path, test_ratio=0.02):
             imgArray = np.load(os.path.join(filepath2, knn_name + '.npy'))
             # print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
             if len(imgArray) == 0:
-                logging.error('Bad Npy: %s' % os.path.join(filepath2, knn_name + '.npy'))
+                logging.error('Bad Npy: %s' %
+                              os.path.join(filepath2, knn_name + '.npy'))
                 continue
             t_time = time.time()
             testNum += len(imgArray)
@@ -359,6 +399,7 @@ def removeAllSpliteOfPath():
             removeAllSplits(os.path.join(path2, file2))
             print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
 
+
 def loadFeature():
     test = np.load(os.path.join(path, knn_name + '_test.npy'))
     train = np.load(os.path.join(path, knn_name + '_train.npy'))
@@ -385,8 +426,10 @@ def loadFeature():
         if n % reportTime == 0:
             print 'Finish %d/%d  SpeedTime: %f s' % (n, trainNum, (time.time() - t_time))
         t_time = time.time()
-    np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_test.npy'), testList)
-    np.save(os.path.join(path, knn_name + '_' + prefix + '_feature_train.npy'), trainList)
+    np.save(os.path.join(path, knn_name + '_' +
+                         prefix + '_feature_test.npy'), testList)
+    np.save(os.path.join(path, knn_name + '_' +
+                         prefix + '_feature_train.npy'), trainList)
     print 'End Feature: Speed Time %f' % (time.time() - m_t)
 
 
@@ -419,6 +462,7 @@ def loadHash():
     np.save(os.path.join(path, 'hash_train.npy'), trainList)
     print 'End Hash: Speed Time %f' % (time.time() - m_t)
 
+
 def resetRandom():
     test = np.load(os.path.join(path, test_name + '_test.npy'))
     train = np.load(os.path.join(path, test_name + '_train.npy'))
@@ -433,37 +477,27 @@ def resetRandom():
         tempList.append(i)
     random.shuffle(tempList)
     # print 'End Random: %d + %d = %d' % (testNum, trainNum, num)
-    np.save(os.path.join(path, test_name + '_test.npy'), tempList[:int(num * test_ratio)])
-    np.save(os.path.join(path, test_name + '_train.npy'), tempList[int(num * test_ratio):])
+    np.save(os.path.join(path, test_name + '_test.npy'),
+            tempList[:int(num * test_ratio)])
+    np.save(os.path.join(path, test_name + '_train.npy'),
+            tempList[int(num * test_ratio):])
 
-def spliteAllOfPath():		   
+
+def spliteAllOfPath():
     if is_feature_now:
         mod = init()
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     print subfolders
-    jobs   =[]
-    z = 0
     for imgDir in subfolders:
         if is_feature_now:
-            mp_kwargs = dict(
-            facescrub_root=os.path.join(path, imgDir),
-            tilesPerImage=tilesPerImage,
-            mod=mod			
-            )
+            splits_resamples(facescrub_root=os.path.join(path, imgDir),
+                             tilesPerImage=tilesPerImage,
+                             mod=mod)
         else:
-            mp_kwargs = dict(
-            facescrub_root=os.path.join(path, imgDir),
-            tilesPerImage=tilesPerImage,
-            )
-        p = multiprocessing.Process(target=splits_resamples, kwargs=mp_kwargs)
-        p.start()
-        z += 1
-        print "##################go to next index,start process for:",z," process"		   
-        jobs.append(p)
-    for p in jobs:
-           print "end of process"	
-           p.join()
+            splits_resamples(facescrub_root=os.path.join(path, imgDir),
+                             tilesPerImage=tilesPerImage)
+
 
 def runTest():
     m_bad = 0
@@ -506,18 +540,24 @@ def runTest():
                 m_bad += 1
                 if is_log:
                     if is_big_key:
-                        logging.error('###### Bad %s(%s: %s) with %s' (ks[i[1]], i[1], i[2], temp))
+                        logging.error('###### Bad %s(%s: %s) with %s' (
+                            ks[i[1]], i[1], i[2], temp))
                     else:
-                        logging.error('###### Bad %s: %s with %s' (i[1], i[2], temp))
+                        logging.error(
+                            '###### Bad %s: %s with %s' (i[1], i[2], temp))
             m_num += 1
             if m_num % reportTime == 1:
-                logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
-                logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
-                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/iter' % (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
+                logging.info('Last accuracy: %.2f %%' %
+                             (m_right / float(m_num) * 100.0))
+                logging.info('Last loss: %.2f %%' %
+                             (m_bad / float(m_num) * 100.0))
+                logging.info('right: %d bad: %d now: %d/%d Time: %.2fs/iter' %
+                             (m_right, m_bad, m_num, testNum * times, (time.time() - t1)))
         # logging.info('End test: %d  train: %d  %f s' % (testNum, trainNum, (time.time() - m_t)))
     logging.info('Last accuracy: %.2f %%' % (m_right / float(m_num) * 100.0))
     logging.info('Last loss: %.2f %%' % (m_bad / float(m_num) * 100.0))
     logging.info('End Run Test')
+
 
 if __name__ == '__main__':
     import sys
@@ -525,7 +565,8 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbp', ['test=', 'train=', 'knn_name=', 'layer=', 'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbpj:', ['test=', 'train=', 'knn_name=', 'layer=',
+                                                                          'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
     for op, value in opts:
         if op == '-f':
             path = value
@@ -543,6 +584,8 @@ if __name__ == '__main__':
             is_caffe = True
         elif op == '--round':
             num_round = int(value)
+        elif op == '-j':
+            cpu_number = int(value)
         elif op == '--prefix':
             prefix = value
         elif op == '--layer':
