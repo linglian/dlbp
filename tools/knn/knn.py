@@ -61,7 +61,7 @@ rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
                 Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
 rotate45degree = [45, 135, 270]
 thresholdGLOABL = 0.42
-pool = None
+pool = multiprocessing.Pool(processes=cpu_number)
 
 def getDistances(f, t, type=1):
     if type == 1:
