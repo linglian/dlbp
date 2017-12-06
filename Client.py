@@ -11,13 +11,8 @@ import time
 
 if __name__ == '__main__':
     filepath = None
-    opts, args = getopt.getopt(sys.argv[1:], 'f:')
-    for op, value in opts:
-        if op == '-f':
-            filepath = value
-    if filepath is None:
-        print 'Must Use -f set Img Path'
-    else:
-        c = Client('./server.temp', authkey=b'lee123456')
-        c.send(['-f', filepath])
-        print c.recv()
+    c = Client('./server.temp', authkey=b'lee123456')
+    c.send(sys.argv[1:])
+    ar = c.recv()
+    for i in ar:
+        print i

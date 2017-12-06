@@ -493,8 +493,6 @@ def spliteAllOfPath():
                              pool=pool)
     pool.close()
     pool.join()
-    for i in result:
-        logging.info(i.get())
 
 
 def runTest():

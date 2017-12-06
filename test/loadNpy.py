@@ -15,6 +15,13 @@ def checkFold(name):
     if not os.path.exists(name):
         os.mkdir(name)
 
+def getDistOfCos(f, t):
+    up = np.sum(np.multiply(f, t))
+    ff = np.sqrt(np.sum(np.multiply(f, f)))
+    tt = np.sqrt(np.sum(np.multiply(t, t)))
+    down = ff * tt
+    return up / down
+
 checkFold(path + '/lst')
 
 checkFile(path + '/lst/test.lst')

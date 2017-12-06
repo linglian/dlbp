@@ -8,6 +8,7 @@ import os
 import cv2
 import numpy as np
 import time
+from PIL import Image
 
 
 filepath = '/home/lol/dl/Image/feature_train.npy'
@@ -19,6 +20,15 @@ layer = 'pool1_output'
 is_pool = True
 dim = 2048
 
+
+
+
+def getDistOfL2(form, to):
+    return cv2.norm(form, to, normType=cv2.NORM_L2)
+
+def checkFold(name):
+    if not os.path.exists(name):
+        os.mkdir(name)
 
 def getImage(img):
     img = cv2.imread(img, 1)
@@ -80,28 +90,70 @@ def getTest(img, mod, train, q, k=20):
     fal = getFeatures(img, f_mod=mod)
     if fal is not None:
         tList = train[np.array(q.find_k_nearest_neighbors(fal, k))]
-        return tList
+        return fal, tList
     else:
-        return None
+        return fal, None
 
 
 def make_work(conn, mod, q, train):
     try:
         while True:
             msg = conn.recv()
-            opts, args = getopt.getopt(msg, 'f:')
+            print msg
+            opts, args = getopt.getopt(msg, 'f:zt:k:')
             img = None
+            k = 20
+            img_type = 0
             for op, value in opts:
                 if op == '-f':
                     img = value
                 elif op == '-z':
                     return 'Close'
-            tList = getTest(img, mod, train, q, k=20)
+                elif op == '-k':
+                    k = int(value)
+                elif op == '-t':
+                    img_type = int(value)
+            if img is None:
+                msg.append('Must set Image Path use -f')
+                return msg
+            
+            msg = []
+            ti_time = time.time()
+            fal, tList = getTest(img, mod, train, q, k=k)
+            msg.append('Test Image Spend Time: %.2lf s' % (time.time() - ti_time))
+            is_Right = False
             if tList is None:
-                conn.send('Bad Img Path')
+                 msg.append('Bad Img Path')
             else:
-                conn.send('Good Job')
-            print tList
+                ti_time2 = time.time()
+                ti = str(int(time.time()))
+                checkFold(os.path.join('/tmp', ti))
+                n = 0
+                m = cv2.imread(img, 1)
+                if m is not None:
+                    im = cv2.resize(m, (1024, 1024))
+                    im = Image.fromarray(im)
+                    im.save('/tmp/%s/GT.JPG' % ti)
+                else:
+                    msg.append('Bad Image: %s' % i[2])
+                for i in tList:
+                    n += 1
+                    m = cv2.imread(i[2], 1)
+                    if m is not None:
+                        im = cv2.resize(m, (1024, 1024))
+                        im = Image.fromarray(im)
+                        im.save('/tmp/%s/%d_%d.JPG' % (ti, n, getDistOfL2(fal, i[0])))
+                    else:
+                        msg.append('Bad Image: %s' % i[2])
+                    if img_type != 0 and img_type == int(i[1]):
+                        is_Right = True
+                msg.append('Save Image Spend Time: %.2lf s' % (time.time() - ti_time2))
+                msg.append('Save Image: /tmp/%s/' % ti)
+            if is_Right and img_type != 0:
+                msg.append('Find Right Image')
+            elif img_type != 0:
+                msg.append('Find Bad Image')
+            return msg
     except EOFError:
         print 'Connection closed'
         return None
@@ -115,6 +167,8 @@ def run_server(address, authkey, mod, q, train):
             msg = make_work(client, mod, q, train)
             if msg == 'Close':
                 break
+            else:    
+                client.send(msg)
         except Exception:
             traceback.print_exc()
 
@@ -128,5 +182,9 @@ if __name__ == '__main__':
         elif op == '-x':
             mxnetpath = value
             sys.path.insert(0, mxnetpath)
+    print 'Start Init'
     mod, q, train = init()
+    print 'End Init'
+    print 'Start Run'
     run_server('./server.temp', b'lee123456', mod, q, train)
+    print 'Stop Run'
