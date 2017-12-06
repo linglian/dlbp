@@ -240,7 +240,7 @@ def temp_Process(subfolders, fold, mod):
                                 [getFeatures(im_cropped, mod), subfolder, imgfile])
                 # don't remove startImg
                 # os.remove(imgfile)
-            except IOError:
+            except Exception:
                 logging.error('Bad Image: %s' % imgfile)
                 continue
         logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
