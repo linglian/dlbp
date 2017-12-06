@@ -175,10 +175,10 @@ def temp_Process(subfolders, fold, mod):
     for subfolder in subfolders:
         imgsfiles = [os.path.join(fold, subfolder, img)
                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-        logging.info('Start Directory: %s' % subfolder)
+        # logging.info('Start Directory: %s' % subfolder)
         temp_list = []
         if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-            logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+            # logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
             continue
         temp_time = time.time()
         for imgfile in imgsfiles:
