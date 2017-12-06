@@ -1,5 +1,4 @@
 import sys
-sys.path.insert(0, '/home/lol/anaconda2/lib/python2.7/site-packages')
 sys.path.insert(0, '/home/lol/anaconda2/lib/python2.7/dist-packages')
 import falconn
 import numpy as np

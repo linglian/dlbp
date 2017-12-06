@@ -189,7 +189,7 @@ def temp_Process(subfolders, fold, mod):
                 im = Image.open(imgfile)
                 w, h = im.size
                 temp_im = cv2.resize(np.array(im), (224, 224))
-                temp_list.append([getFeatures(temp_im, mod), subfolder, newname])
+                temp_list.append([getFeatures(temp_im, mod), subfolder, imgfile])
                 im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
                 #dx = 224
 
