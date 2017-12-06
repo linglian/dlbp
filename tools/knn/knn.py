@@ -273,7 +273,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
     print cut
     pool = multiprocessing.Pool()
     print pool
-    pool.open()
     result = []
     for i in range(0, cpu_number - 1):
         start = cut * i
@@ -287,7 +286,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         logging.info(subfolders[start:end])
         result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
         logging.info('########Process %d Start' % cpu_number)
-    pool.close()
     pool.join()
     for i in result:
         logging.info(i.get())
