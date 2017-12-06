@@ -175,10 +175,10 @@ def temp_Process(subfolders, fold, mod):
     for subfolder in subfolders:
         imgsfiles = [os.path.join(fold, subfolder, img)
                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
-        # logging.info('Start Directory: %s' % subfolder)
+        logging.info('Start Directory: %s' % subfolder)
         temp_list = []
         if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-            # logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+            logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
             continue
         temp_time = time.time()
         for imgfile in imgsfiles:
@@ -188,6 +188,8 @@ def temp_Process(subfolders, fold, mod):
             try:
                 im = Image.open(imgfile)
                 w, h = im.size
+                temp_im = cv2.resize(np.array(im), (224, 224))
+                temp_list.append([getFeatures(temp_im, mod), subfolder, newname])
                 im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
                 #dx = 224
 
