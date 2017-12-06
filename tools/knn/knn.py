@@ -270,25 +270,25 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
 
     logging.info('Has Cpu Number: %d' % cpu_number)
     cut = int(len(subfolders) / cpu_number)
-    print cut
-    pool = multiprocessing.Pool()
-    print pool
-    result = []
+    jobs = []
     for i in range(0, cpu_number - 1):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
+        p = multiprocessing.Process(temp_Process, (subfolders[start:end], fold, mod))
+        jobs.append(p)
+        p.start()
         logging.info('########Process %d Start' % i)
     if end != len(subfolders):
         start = end
         end = len(subfolders)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
+        p = multiprocessing.Process(temp_Process, (subfolders[start:end], fold, mod))
+        jobs.append(p)
+        p.start()
         logging.info('########Process %d Start' % cpu_number)
-    pool.join()
-    for i in result:
-        logging.info(i.get())
+    for i in jobs:
+        jobs.join()
     logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
 
