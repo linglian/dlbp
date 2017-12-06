@@ -247,7 +247,7 @@ def temp_Process(subfolders, fold, mod):
         np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
     return 'Good Ending %s    %s' % (fold, subfolders)
 
-def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
+def splits_resamples(facescrub_root, tilesPerImage=360, mod=None, pool=None):
     #import sklearn
     t_time = time.time()
     # logging.info('Start ImageDir: %s ' % facescrub_root)
@@ -270,35 +270,24 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
 
     logging.info('Has Cpu Number: %d' % cpu_number)
     cut = int(len(subfolders) / cpu_number)
-    jobs = []
+    print cut
+    result = []
     for i in range(0, cpu_number - 1):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        mp_kwargs = dict(
-        subfolders=subfolders[start:end],
-        fold=fold,
-        mod=mod			
-        )
-        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
-        jobs.append(p)
-        p.start()
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
         logging.info('########Process %d Start' % i)
     if end != len(subfolders):
         start = end
         end = len(subfolders)
         logging.info(subfolders[start:end])
-        mp_kwargs = dict(
-        subfolders=subfolders[start:end],
-        fold=fold,
-        mod=mod			
-        )
-        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
-        jobs.append(p)
-        p.start()
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
         logging.info('########Process %d Start' % cpu_number)
-    for i in jobs:
-        jobs.join()
+    # pool.close()
+    # pool.join()
+    # for i in result:
+    #     logging.info(i.get())
     logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
 
@@ -491,14 +480,21 @@ def spliteAllOfPath():
         mod = init()
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
+    pool = multiprocessing.Pool()
     for imgDir in subfolders:
         if is_feature_now:
             splits_resamples(facescrub_root=os.path.join(path, imgDir),
                              tilesPerImage=tilesPerImage,
-                             mod=mod)
+                             mod=mod,
+                             pool=pool)
         else:
             splits_resamples(facescrub_root=os.path.join(path, imgDir),
-                             tilesPerImage=tilesPerImage)
+                             tilesPerImage=tilesPerImage,
+                             pool=pool)
+    pool.close()
+    pool.join()
+    for i in result:
+        logging.info(i.get())
 
 
 def runTest():
