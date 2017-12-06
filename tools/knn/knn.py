@@ -61,6 +61,7 @@ rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
                 Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
 rotate45degree = [45, 135, 270]
 thresholdGLOABL = 0.42
+pool = multiprocessing.Pool()
 
 def getDistances(f, t, type=1):
     if type == 1:
@@ -195,7 +196,6 @@ def temp_Process(subfolders, fold, mod):
 
                 dx = dy = 224
                 for i in range(1, tilesPerImage + 1):
-                    newname = imgfile.replace('.', '_{:03d}.'.format(i))
                     # print newname
                     w, h = im.size
                     if w < 224:
@@ -235,10 +235,10 @@ def temp_Process(subfolders, fold, mod):
                             np.array(im_cropped), (224, 224))
                         if is_feature_now == False:
                             temp_list.append(
-                                [im_cropped, subfolder, newname])
+                                [im_cropped, subfolder, imgfile])
                         else:
                             temp_list.append(
-                                [getFeatures(im_cropped, mod), subfolder, newname])
+                                [getFeatures(im_cropped, mod), subfolder, imgfile])
                 # don't remove startImg
                 # os.remove(imgfile)
             except IOError:
@@ -271,9 +271,6 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
 
     logging.info('Has Cpu Number: %d' % cpu_number)
     cut = int(len(subfolders) / cpu_number)
-    print cut
-    pool = multiprocessing.Pool()
-    print pool
     result = []
     for i in range(0, cpu_number - 1):
         start = cut * i

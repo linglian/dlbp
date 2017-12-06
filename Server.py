@@ -1,5 +1,4 @@
 from multiprocessing.connection import Listener
-import Queue
 import sys
 import getopt
 import traceback
@@ -79,8 +78,11 @@ def init():
 
 def getTest(img, mod, train, q, k=20):
     fal = getFeatures(img, f_mod=mod)
-    tList = train[q.find_k_nearest_neighbors(fal, k)]
-    return tList
+    if fal is not None:
+        tList = train[np.array(q.find_k_nearest_neighbors(fal, k))]
+        return tList
+    else:
+        return None
 
 
 def make_work(conn, mod, q, train):
@@ -94,7 +96,12 @@ def make_work(conn, mod, q, train):
                     img = value
                 elif op == '-z':
                     return 'Close'
-            print getTest(img, mod, train, q, k=20)
+            tList = getTest(img, mod, train, q, k=20)
+            if tList is None:
+                conn.send('Bad Img Path')
+            else:
+                conn.send('Good Job')
+            print tList
     except EOFError:
         print 'Connection closed'
         return None
@@ -113,10 +120,8 @@ def run_server(address, authkey, mod, q, train):
 
 
 if __name__ == '__main__':
-    task_queue = Queue.Queue()
     opts, args = getopt.getopt(sys.argv[1:], 'f:x:')
-    print sys.argv[0:]
-    print sys.argv[1:]
+    print sys.argv
     for op, value in opts:
         if op == '-f':
             filepath = value
