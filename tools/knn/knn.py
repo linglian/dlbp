@@ -275,7 +275,12 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        p = multiprocessing.Process(temp_Process, (subfolders[start:end], fold, mod))
+        mp_kwargs = dict(
+        subfolders=subfolders[start:end],
+        fold=fold,
+        mod=mod			
+        )
+        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
         jobs.append(p)
         p.start()
         logging.info('########Process %d Start' % i)
@@ -283,7 +288,12 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None):
         start = end
         end = len(subfolders)
         logging.info(subfolders[start:end])
-        p = multiprocessing.Process(temp_Process, (subfolders[start:end], fold, mod))
+        mp_kwargs = dict(
+        subfolders=subfolders[start:end],
+        fold=fold,
+        mod=mod			
+        )
+        p = multiprocessing.Process(target=temp_Process, kwargs=mp_kwargs)
         jobs.append(p)
         p.start()
         logging.info('########Process %d Start' % cpu_number)
