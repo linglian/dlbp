@@ -100,10 +100,12 @@ def make_work(conn, mod, q, train):
         while True:
             msg = conn.recv()
             print msg
-            opts, args = getopt.getopt(msg, 'f:zt:k:')
+            opts, args = getopt.getopt(msg, 'f:zt:k:s', ['help'])
             img = None
             k = 20
             img_type = 0
+            is_save = True
+            msg = []
             for op, value in opts:
                 if op == '-f':
                     img = value
@@ -111,44 +113,62 @@ def make_work(conn, mod, q, train):
                     return 'Close'
                 elif op == '-k':
                     k = int(value)
+                elif op == '-s':
+                    is_save = False
                 elif op == '-t':
                     img_type = int(value)
+                elif op == '--help':
+                    msg.append(' ')
+                    msg.append('Usage:')
+                    msg.append('  Client [options]')
+                    msg.append(' ')
+                    msg.append('General Options:')
+                    msg.append('-f <path>\t\t Set test image path')
+                    msg.append('-z \t\t\t Close server')
+                    msg.append('-k <number>\t\t Set rank')
+                    msg.append('-s \t\t\t No Save image of rank K')
+                    msg.append('-t <number>\t\t Set image type if you want to know test type')
+                    return msg
             if img is None:
                 msg.append('Must set Image Path use -f')
                 return msg
             
-            msg = []
             ti_time = time.time()
             fal, tList = getTest(img, mod, train, q, k=k)
             msg.append('Test Image Spend Time: %.2lf s' % (time.time() - ti_time))
             is_Right = False
             if tList is None:
                  msg.append('Bad Img Path')
+                 return msg
             else:
                 ti_time2 = time.time()
                 ti = str(int(time.time()))
-                checkFold(os.path.join('/tmp', ti))
-                n = 0
-                m = cv2.imread(img, 1)
-                if m is not None:
-                    im = cv2.resize(m, (1024, 1024))
-                    im = Image.fromarray(im)
-                    im.save('/tmp/%s/GT.JPG' % ti)
-                else:
-                    msg.append('Bad Image: %s' % i[2])
-                for i in tList:
-                    n += 1
-                    m = cv2.imread(i[2], 1)
+                if is_save:
+                    checkFold(os.path.join('/tmp/image'))
+                    checkFold(os.path.join('/tmp/image', ti))
+                    n = 0
+                    m = cv2.imread(img, 1)
                     if m is not None:
                         im = cv2.resize(m, (1024, 1024))
                         im = Image.fromarray(im)
-                        im.save('/tmp/%s/%d_%d.JPG' % (ti, n, getDistOfL2(fal, i[0])))
+                        im.save('/tmp/image/%s/GT.JPG' % ti)
                     else:
                         msg.append('Bad Image: %s' % i[2])
+                for i in tList:
+                    if is_save:
+                        n += 1
+                        m = cv2.imread(i[2], 1)
+                        if m is not None:
+                            im = cv2.resize(m, (1024, 1024))
+                            im = Image.fromarray(im)
+                            im.save('/tmp/image/%s/%d_%d.JPG' % (ti, n, getDistOfL2(fal, i[0])))
+                        else:
+                            msg.append('Bad Image: %s' % i[2])
                     if img_type != 0 and img_type == int(i[1]):
                         is_Right = True
-                msg.append('Save Image Spend Time: %.2lf s' % (time.time() - ti_time2))
-                msg.append('Save Image: /tmp/%s/' % ti)
+                if is_save:
+                    msg.append('Save Image Spend Time: %.2lf s' % (time.time() - ti_time2))
+                    msg.append('Save Image: /tmp/image/%s/' % ti)
             if is_Right and img_type != 0:
                 msg.append('Find Right Image')
             elif img_type != 0:

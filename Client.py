@@ -11,8 +11,11 @@ import time
 
 if __name__ == '__main__':
     filepath = None
-    c = Client('./server.temp', authkey=b'lee123456')
-    c.send(sys.argv[1:])
-    ar = c.recv()
-    for i in ar:
-        print i
+    try:
+        c = Client('./server.temp', authkey=b'lee123456')
+        c.send(sys.argv[1:])
+        ar = c.recv()
+        for i in ar:
+            print i
+    except EOFError:
+        print 'Connection closed, Please Reset Server.'
