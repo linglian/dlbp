@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import time
 from PIL import Image
+import gc
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -75,6 +76,8 @@ def load_all_beOne(path):
                 if n % reportTime == 0:
                     # print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
                     t_time = time.time()
+            del imgArray
+            gc.collect()
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     return main_imgArray
 
