@@ -12,7 +12,7 @@ import time
 if __name__ == '__main__':
     filepath = None
     try:
-        c = Client('./server.temp', authkey=b'lee123456')
+        c = Client('./server2.temp', authkey=b'lee123456')
         c.send(sys.argv[1:])
         ar = c.recv()
         for i in ar:
