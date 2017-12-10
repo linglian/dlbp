@@ -32,6 +32,7 @@ layer = 'pool1_output'
 is_pool = True
 dim = 2048
 reportTime = 500
+max_img = 32
 
 
 def load_all_beOne(path):
@@ -64,7 +65,11 @@ def load_all_beOne(path):
                 continue
             t_time = time.time()
             testNum += len(imgArray)
+            m = 0
             for i in imgArray:
+                if m >= max_img:
+                    break;
+                m += 1
                 main_imgArray.append(i)
                 n += 1
                 if n % reportTime == 0:
@@ -245,11 +250,13 @@ def run_server(address, authkey, mod, q, train):
 
 
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], 'f:x:')
+    opts, args = getopt.getopt(sys.argv[1:], 'f:x:m:')
     print sys.argv
     for op, value in opts:
         if op == '-f':
             path = value
+        if op == '-m':
+            max_img = int(value)
         elif op == '-x':
             mxnetpath = value
             sys.path.insert(0, mxnetpath)
