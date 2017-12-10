@@ -147,8 +147,6 @@ def init():
 def getTest(img, mod, train, q, k=20):
     fal = getFeatures(img, f_mod=mod)
     if fal is not None:
-        print train
-        print np.array(q.find_k_nearest_neighbors(fal, k))
         tList = train[np.array(q.find_k_nearest_neighbors(fal, k))]
         return fal, tList
     else:
