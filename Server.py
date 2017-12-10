@@ -105,7 +105,7 @@ def getFeatures(img, f_mod=None):
 
 
 def init_hash():
-    train = load_all_beOne()
+    train = load_all_beOne(path)
     trainNum = len(train)
     p = falconn.get_default_parameters(trainNum, dim)
     t = falconn.LSHIndex(p)
@@ -209,7 +209,7 @@ def make_work(conn, mod, q, train):
                     if is_save:
                         n += 1
                         m = cv2.imread(i[2], 1)
-                        if m is not None:
+                  path      if m is not None:
                             im = cv2.resize(m, (1024, 1024))
                             im = Image.fromarray(im)
                             im.save('/tmp/image/%s/%d_%d.JPG' % (ti, n, getDistOfL2(fal, i[0])))
