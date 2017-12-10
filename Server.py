@@ -33,7 +33,7 @@ layer = 'pool1_output'
 is_pool = True
 dim = 2048
 reportTime = 500
-max_img = 32
+max_img = 0
 
 
 def load_all_beOne(path):
@@ -48,35 +48,34 @@ def load_all_beOne(path):
     print 'Start Merge Npy'
     n = 0
     testNum = 0
+    num = 0
     for file in subfolders:
         filepath = os.path.join(path, file)
         print 'Start Merge Npy %s' % filepath
         subfolders2 = [folder for folder in os.listdir(
             filepath) if os.path.isdir(os.path.join(filepath, folder))]
         print subfolders2
-        imgArray = []
         for file2 in subfolders2:
             t1 = time.time()
             filepath2 = os.path.join(filepath, file2)
             imgArray = np.load(os.path.join(filepath2, 'knn_splite.npy'))
+            num += sys.getsizeof(imgArray)
             # print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
             if len(imgArray) == 0:
                 logging.error('Bad Npy: %s' %
                               os.path.join(filepath2, 'knn_splite.npy'))
                 continue
             t_time = time.time()
-            testNum += len(imgArray)
-            m = 0
-            for i in imgArray:
-                if m >= max_img:
-                    break;
-                m += 1
+            if max_img != 0:
+                tempArray = imgArray[0:max_img].copy()
+            else:
+                tempArray = imgArray.copy()
+            del imgArray
+            for i in tempArray:
                 main_imgArray.append(i)
                 n += 1
                 if n % reportTime == 0:
-                    # print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
                     t_time = time.time()
-            del imgArray
             gc.collect()
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     return main_imgArray
@@ -269,5 +268,5 @@ if __name__ == '__main__':
     mod, q, train = init()
     print 'End Init'
     print 'Start Run'
-    run_server('./server.temp', b'lee123456', mod, q, train)
+    run_server('./server2.temp', b'lee123456', mod, q, train)
     print 'Stop Run'
