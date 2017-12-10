@@ -10,8 +10,20 @@ import numpy as np
 import time
 from PIL import Image
 
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S',
+                    filename='test_train_Server.log',
+                    filemode='w')
 
-filepath = '/home/lol/dl/Image/feature_train.npy'
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
+path = '/home/lol/dl/Image/feature_train.npy'
 mxnetpath = '/home/lol/dl/mxnet/python'
 sys.path.insert(0, mxnetpath)
 num_round = 0
@@ -19,8 +31,47 @@ prefix = "full-resnet-152"
 layer = 'pool1_output'
 is_pool = True
 dim = 2048
+reportTime = 500
 
 
+def load_all_beOne(path):
+    import time
+    import random
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    print subfolders
+    tt = time.time()
+    main_imgArray = []
+    per = 0
+    print 'Start Merge Npy'
+    n = 0
+    testNum = 0
+    for file in subfolders:
+        filepath = os.path.join(path, file)
+        print 'Start Merge Npy %s' % filepath
+        subfolders2 = [folder for folder in os.listdir(
+            filepath) if os.path.isdir(os.path.join(filepath, folder))]
+        print subfolders2
+        imgArray = []
+        for file2 in subfolders2:
+            t1 = time.time()
+            filepath2 = os.path.join(filepath, file2)
+            imgArray = np.load(os.path.join(filepath2, 'knn_splite.npy'))
+            # print 'Load Knn.npy: %s' % (os.path.join(filepath2, knn_name + '.npy'))
+            if len(imgArray) == 0:
+                logging.error('Bad Npy: %s' %
+                              os.path.join(filepath2, 'knn_splite.npy'))
+                continue
+            t_time = time.time()
+            testNum += len(imgArray)
+            for i in imgArray:
+                main_imgArray.append(i)
+                n += 1
+                if n % reportTime == 0:
+                    # print 'Finish %d/%d  SpeedTime: %f s' % (n, testNum, (time.time() - t_time))
+                    t_time = time.time()
+        print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
+    return main_imgArray
 
 
 def getDistOfL2(form, to):
@@ -54,7 +105,7 @@ def getFeatures(img, f_mod=None):
 
 
 def init_hash():
-    train = np.load(filepath)
+    train = load_all_beOne()
     trainNum = len(train)
     p = falconn.get_default_parameters(trainNum, dim)
     t = falconn.LSHIndex(p)
@@ -99,7 +150,7 @@ def make_work(conn, mod, q, train):
     try:
         while True:
             msg = conn.recv()
-            print msg
+            logging.info(msg)
             opts, args = getopt.getopt(msg, 'f:zt:k:s', ['help'])
             img = None
             k = 20
@@ -175,7 +226,7 @@ def make_work(conn, mod, q, train):
                 msg.append('Find Bad Image')
             return msg
     except EOFError:
-        print 'Connection closed'
+        logging.info('Connection closed')
         return None
 
 
@@ -198,7 +249,7 @@ if __name__ == '__main__':
     print sys.argv
     for op, value in opts:
         if op == '-f':
-            filepath = value
+            path = value
         elif op == '-x':
             mxnetpath = value
             sys.path.insert(0, mxnetpath)
