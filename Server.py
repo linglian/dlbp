@@ -110,7 +110,7 @@ def getFeatures(img, f_mod=None):
 
 
 def init_hash():
-    train = load_all_beOne(path)
+    train = np.array(load_all_beOne(path))
     trainNum = len(train)
     p = falconn.get_default_parameters(trainNum, dim)
     t = falconn.LSHIndex(p)
@@ -145,6 +145,8 @@ def init():
 def getTest(img, mod, train, q, k=20):
     fal = getFeatures(img, f_mod=mod)
     if fal is not None:
+        print train
+        print np.array(q.find_k_nearest_neighbors(fal, k))
         tList = train[np.array(q.find_k_nearest_neighbors(fal, k))]
         return fal, tList
     else:
