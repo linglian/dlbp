@@ -34,7 +34,7 @@ is_pool = True
 dim = 2048
 reportTime = 500
 max_img = 0
-
+splite_num = 144
 
 def load_all_beOne(path):
     import time
@@ -66,16 +66,17 @@ def load_all_beOne(path):
                               os.path.join(filepath2, 'knn_splite.npy'))
                 continue
             t_time = time.time()
-            if max_img != 0:
-                tempArray = imgArray[0:max_img].copy()
-            else:
-                tempArray = imgArray.copy()
-            del imgArray
-            for i in tempArray:
-                main_imgArray.append(i)
+            j = 0
+            for i in imgArray:
+                if j <= max_img:
+                    main_imgArray.append(i.copy())
                 n += 1
+                j += 1
+                if j >= splite_num:
+                    j = 0
                 if n % reportTime == 0:
                     t_time = time.time()
+            del imgArray
             gc.collect()
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     return main_imgArray
@@ -83,6 +84,13 @@ def load_all_beOne(path):
 
 def getDistOfL2(form, to):
     return cv2.norm(form, to, normType=cv2.NORM_L2)
+
+def getDistOfCos(f, t):
+    up = np.sum(np.multiply(f, t))
+    ff = np.sqrt(np.sum(np.multiply(f, f)))
+    tt = np.sqrt(np.sum(np.multiply(t, t)))
+    down = ff * tt
+    return up / down
 
 def checkFold(name):
     if not os.path.exists(name):
@@ -153,6 +161,14 @@ def getTest(img, mod, train, q, k=20):
         return fal, None
 
 
+def find_last(string,str):
+    last_position=-1
+    while True:
+        position=string.find(str,last_position+1)
+        if position==-1:
+            return last_position
+        last_position=position
+
 def make_work(conn, mod, q, train):
     try:
         while True:
@@ -202,14 +218,14 @@ def make_work(conn, mod, q, train):
                 ti_time2 = time.time()
                 ti = str(int(time.time()))
                 if is_save:
-                    checkFold(os.path.join('/tmp/image'))
-                    checkFold(os.path.join('/tmp/image', ti))
+                    checkFold(os.path.join('/media/lee/data/image'))
+                    checkFold(os.path.join('/media/lee/data/image', ti))
                     n = 0
                     m = cv2.imread(img, 1)
                     if m is not None:
                         im = cv2.resize(m, (1024, 1024))
                         im = Image.fromarray(im)
-                        im.save('/tmp/image/%s/GT.JPG' % ti)
+                        im.save('/media/lee/data/image/%s/GT_%s.JPG' % (ti, img[find_last(img, '/') + 1: find_last(img, '.')]))
                     else:
                         msg.append('Bad Image: %s' % i[2])
                 for i in tList:
@@ -219,14 +235,15 @@ def make_work(conn, mod, q, train):
                         if m is not None:
                             im = cv2.resize(m, (1024, 1024))
                             im = Image.fromarray(im)
-                            im.save('/tmp/image/%s/%d_%d.JPG' % (ti, n, getDistOfL2(fal, i[0])))
+                            gailv = int(getDistOfCos(fal, i[0]) * 100)
+                            im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, gailv, i[1]))
                         else:
                             msg.append('Bad Image: %s' % i[2])
                     if img_type != 0 and img_type == int(i[1]):
                         is_Right = True
                 if is_save:
                     msg.append('Save Image Spend Time: %.2lf s' % (time.time() - ti_time2))
-                    msg.append('Save Image: /tmp/image/%s/' % ti)
+                    msg.append('Save Image: /media/lee/data/image/%s/' % ti)
             if is_Right and img_type != 0:
                 msg.append('Find Right Image')
             elif img_type != 0:
