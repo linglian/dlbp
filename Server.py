@@ -93,6 +93,11 @@ def load_all_beOne(path):
             gc.collect()
 #           break
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
+    print 'Save %s' % os.path.join(path, 'my_test.npy')
+    np.save(os.path.join(path, 'my_test.npy'), main_imgArray[:int(len(main_imgArray) * 0.02)])
+    print 'Save %s' % os.path.join(path, 'my_train.npy')
+    np.save(os.path.join(path, 'my_train.npy'), main_imgArray[int(len(main_imgArray) * 0.02):])
+    print 'Good Job'
     return main_imgArray
 
 
