@@ -260,13 +260,19 @@ def make_work(conn, mod, q, train):
                         temp_click += 1
                         is_Right = True
                 print len(imgList)
+                number = 1
                 for i in imgList:
                     if is_save:
                         m = cv2.imread(i, 1)
                         if m is not None:
                             im = cv2.resize(m, (1024, 1024))
                             im = Image.fromarray(im)
-                            im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1]))
+                            if os.path.exists('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1])):
+                                im.save('/media/lee/data/image/%s/%d%%_%s(%d).JPG' % (ti, imgList[i][0], imgList[i][1], number))
+                                number += 1
+                            else:
+                                number = 1
+                                im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1]))
                         else:
                             msg.append('Bad Image: %s' % i)
                 if is_save:
