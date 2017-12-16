@@ -67,6 +67,7 @@ def load_all_beOne(path):
                 continue
             t_time = time.time()
             j = 0
+            '''
             for i in imgArray:
                 if j <= max_img:
                     main_imgArray.append(i.copy())
@@ -76,8 +77,21 @@ def load_all_beOne(path):
                     j = 0
                 if n % reportTime == 0:
                     t_time = time.time()
+            '''
+            tempArImg = None
+            for i in imgArray:
+                if j == 0 or j >= splite_num:
+                    j = 0
+                    if tempArImg is not None:
+                        tempArImg[0] = tempArImg[0] / splite_num
+                        main_imgArray.append(tempArImg)
+                    tempArImg = i.copy()
+                j += 1
+                for k in range(0, 2048):
+                    tempArImg[0][k] += i[0][k]
             del imgArray
             gc.collect()
+#           break
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     return main_imgArray
 
