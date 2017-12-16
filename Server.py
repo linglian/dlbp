@@ -91,7 +91,7 @@ def load_all_beOne(path):
             '''
             del imgArray
             gc.collect()
-            break
+#            break
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
     print 'Good Job'
     return main_imgArray
