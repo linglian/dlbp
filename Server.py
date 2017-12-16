@@ -67,7 +67,6 @@ def load_all_beOne(path):
                 continue
             t_time = time.time()
             j = 0
-            '''
             for i in imgArray:
                 if j <= max_img:
                     main_imgArray.append(i.copy())
@@ -89,14 +88,11 @@ def load_all_beOne(path):
                 j += 1
                 for k in range(0, 2048):
                     tempArImg[0][k] += i[0][k]
+            '''
             del imgArray
             gc.collect()
-#           break
+            break
         print 'End Merge Npy: %d %f s' % (len(main_imgArray), (time.time() - tt))
-    print 'Save %s' % os.path.join(path, 'my_test.npy')
-    np.save(os.path.join(path, 'my_test.npy'), main_imgArray[:int(len(main_imgArray) * 0.02)])
-    print 'Save %s' % os.path.join(path, 'my_train.npy')
-    np.save(os.path.join(path, 'my_train.npy'), main_imgArray[int(len(main_imgArray) * 0.02):])
     print 'Good Job'
     return main_imgArray
 
@@ -227,7 +223,7 @@ def make_work(conn, mod, q, train):
                 return msg
             
             ti_time = time.time()
-            fal, tList = getTest(img, mod, train, q, k=k)
+            fal, tList = getTest(img, mod, train, q, k=k * max_img)
             msg.append('Test Image Spend Time: %.2lf s' % (time.time() - ti_time))
             is_Right = False
             if tList is None:
@@ -247,19 +243,30 @@ def make_work(conn, mod, q, train):
                         im.save('/media/lee/data/image/%s/GT_%s.JPG' % (ti, img[find_last(img, '/') + 1: find_last(img, '.')]))
                     else:
                         msg.append('Bad Image: %s' % i[2])
+                imgList = {}
+                temp_click = 0
                 for i in tList:
                     if is_save:
                         n += 1
-                        m = cv2.imread(i[2], 1)
+                        gailv = int(getDistOfCos(fal, i[0]) * 100)
+                        if imgList.has_key(i[2]):
+                            imgList[i[2]] = [max(imgList[i[2]], gailv), i[1]]
+                        else:
+                            imgList[i[2]] = [gailv, i[1]]
+                        if n >= k:
+                            break
+                    if img_type != 0 and img_type == int(i[1]) and temp_click <= k:
+                        temp_click += 1
+                        is_Right = True
+                for i in imgList:
+                    if is_save:
+                        m = cv2.imread(i, 1)
                         if m is not None:
                             im = cv2.resize(m, (1024, 1024))
                             im = Image.fromarray(im)
-                            gailv = int(getDistOfCos(fal, i[0]) * 100)
-                            im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, gailv, i[1]))
+                            im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1]))
                         else:
-                            msg.append('Bad Image: %s' % i[2])
-                    if img_type != 0 and img_type == int(i[1]):
-                        is_Right = True
+                            msg.append('Bad Image: %s' % i)
                 if is_save:
                     msg.append('Save Image Spend Time: %.2lf s' % (time.time() - ti_time2))
                     msg.append('Save Image: /media/lee/data/image/%s/' % ti)
