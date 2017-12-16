@@ -246,7 +246,6 @@ def make_work(conn, mod, q, train):
                         msg.append('Bad Image: %s' % i[2])
                 imgList = {}
                 temp_click = 0
-                print len(tList)
                 for i in tList:
                     if is_save:
                         gailv = int(getDistOfCos(fal, i[0]) * 100)
@@ -259,7 +258,6 @@ def make_work(conn, mod, q, train):
                     if img_type != 0 and img_type == int(i[1]) and temp_click <= k:
                         temp_click += 1
                         is_Right = True
-                print len(imgList)
                 number = 1
                 for i in imgList:
                     if is_save:
