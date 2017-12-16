@@ -247,13 +247,12 @@ def make_work(conn, mod, q, train):
                 temp_click = 0
                 for i in tList:
                     if is_save:
-                        n += 1
                         gailv = int(getDistOfCos(fal, i[0]) * 100)
                         if imgList.has_key(i[2]):
                             imgList[i[2]] = [max(imgList[i[2]][0], gailv), i[1]]
                         else:
                             imgList[i[2]] = [gailv, i[1]]
-                        if n >= k:
+                        if len(imgList) >= k:
                             break
                     if img_type != 0 and img_type == int(i[1]) and temp_click <= k:
                         temp_click += 1
