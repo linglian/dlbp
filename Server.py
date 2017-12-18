@@ -249,10 +249,10 @@ def make_work(conn, mod, q, train):
                 for i in tList:
                     if is_save:
                         gailv = int(getDistOfCos(fal, i[0]) * 100)
-                        if imgList.has_key(i[2]):
-                            imgList[i[2]] = [max(imgList[i[2]][0], gailv), i[1]]
+                        if imgList.has_key(i[1]):
+                            imgList[i[1]] = [max(imgList[i[1]][0], gailv), i[2]]
                         else:
-                            imgList[i[2]] = [gailv, i[1]]
+                            imgList[i[1]] = [gailv, i[2]]
                         if len(imgList) >= k:
                             break
                     if img_type != 0 and img_type == int(i[1]) and temp_click <= k:
@@ -261,16 +261,16 @@ def make_work(conn, mod, q, train):
                 number = 1
                 for i in imgList:
                     if is_save:
-                        m = cv2.imread(i, 1)
+                        m = cv2.imread(imgList[i][1], 1)
                         if m is not None:
                             im = cv2.resize(m, (1024, 1024))
                             im = Image.fromarray(im)
-                            if os.path.exists('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1])):
-                                im.save('/media/lee/data/image/%s/%d%%_%s(%d).JPG' % (ti, imgList[i][0], imgList[i][1], number))
+                            if os.path.exists('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], i)):
+                                im.save('/media/lee/data/image/%s/%d%%_%s(%d).JPG' % (ti, imgList[i][0], i, number))
                                 number += 1
                             else:
                                 number = 1
-                                im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], imgList[i][1]))
+                                im.save('/media/lee/data/image/%s/%d%%_%s.JPG' % (ti, imgList[i][0], i))
                         else:
                             msg.append('Bad Image: %s' % i)
                 if is_save:
