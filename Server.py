@@ -250,7 +250,8 @@ def make_work(conn, mod, q, train):
                     if is_save:
                         gailv = int(getDistOfCos(fal, i[0]) * 100)
                         if imgList.has_key(i[1]):
-                            imgList[i[1]] = [max(imgList[i[1]][0], gailv), i[2]]
+                            if imgList[i[1]][0] < gailv:
+                                imgList[i[1]] = [gailv, i[2]]
                         else:
                             imgList[i[1]] = [gailv, i[2]]
                         if len(imgList) >= k:
