@@ -38,16 +38,17 @@ train_file_name = 'knn_train.npy'
 
 def resetRandom():
     import random
+    '''
     test = np.load(os.path.join(path, test_name + '_test.npy'))
     train = np.load(os.path.join(path, test_name + '_train.npy'))
     testNum = len(test)
     trainNum = len(train)
-    num = testNum + trainNum
+    '''
+    nums = np.load(os.path.join(path, test_name + '.npy'))
+    num = len(nums)
     tempList = []
     # print 'Start Random: %d + %d = %d' % (testNum, trainNum, num)
-    for i in test:
-        tempList.append(i)
-    for i in train:
+    for i in nums:
         tempList.append(i)
     random.shuffle(tempList)
     # print 'End Random: %d + %d = %d' % (testNum, trainNum, num)
@@ -80,6 +81,8 @@ def runTest():
         t2 = time.time()
         for i in test:
             t1 = time.time()
+            #print(i)
+            i[0] = np.ravel(i[0])
             tList = train[q.find_k_nearest_neighbors(i[0], k)]
             is_true = False
             for l in tList:
@@ -121,7 +124,7 @@ if __name__ == '__main__':
     from collections import Counter
     import random
 
-    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hbd:', ['test=', 'train=','time=', 'dist=', 'report=', 'size', 'log'])
+    opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:v:hbd:', ['npy=', 'test=', 'train=','time=', 'dist=', 'report=', 'size', 'log'])
     for op, value in opts:
         if op == '-f':
             path = value

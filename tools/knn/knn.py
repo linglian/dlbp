@@ -62,6 +62,7 @@ rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
 rotate45degree = [45, 135, 270]
 thresholdGLOABL = 0.42
 
+
 def getDistances(f, t, type=1):
     if type == 1:
         return getDistOfL2(f, t)
@@ -113,7 +114,7 @@ def getImage(img):
     return img
 
 
-def getFeatures(img, f_mod=None, transformer=None):
+def getFeatures(img, f_mod=None):
     img = getImage(img)
     f = f_mod.predict(img)
     f = np.ravel(f)
@@ -151,8 +152,10 @@ def getHash(img):
     im = Image.fromarray(img)
     return ih.average_hash(im, 8)
 
+
 def sayHello(a, b):
     print 'Hello'
+
 
 def im_crotate_image_square(im, deg):
     im2 = im.rotate(deg, expand=1)
@@ -171,40 +174,45 @@ def im_crotate_image_square(im, deg):
 
     return im.crop((left, top, right, bottom))
 
-def temp_Process(subfolders, fold, mod):
+
+def temp_Process(subfolders, fold, mod, fileName='knn_splite.npy'):
+    # logging.info(subfolders)
     for subfolder in subfolders:
         imgsfiles = [os.path.join(fold, subfolder, img)
                         for img in os.listdir(os.path.join(fold, subfolder)) if img.endswith('.JPG')]
         logging.info('Start Directory: %s' % subfolder)
         temp_list = []
-        if not_double and os.path.exists(os.path.join(fold, subfolder, 'knn_splite.npy')):
-            logging.info('Has %s' % os.path.join(fold, subfolder, 'knn_splite.npy'))
+        if not_double and os.path.exists(os.path.join(fold, subfolder, fileName)):
+            logging.info('Has %s' % os.path.join(fold, subfolder, fileName))
             continue
         temp_time = time.time()
+        # logging.info(imgsfiles);
         for imgfile in imgsfiles:
             if os.path.exists(imgfile) == False:
                 logging.error('Bad Image: %s' % imgfile)
                 continue
             try:
+                # 打开图片
                 im = Image.open(imgfile)
+                # 获得原始图片大小
                 w, h = im.size
+                # 变换形状224， 224
                 temp_im = cv2.resize(np.array(im), (224, 224))
-                temp_list.append([getFeatures(temp_im, mod), subfolder, imgfile])
+                # 增加原始图片
+                if is_feature_now:
+                    temp_list.append(
+                        [getFeatures(temp_im, mod), subfolder, imgfile])
+                else:
+                    temp_list.append(
+                        [temp_im, subfolder, imgfile])
+                # 删除图片上下尺子的影响
                 im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
-                #dx = 224
 
                 dx = dy = 224
+                # 将图片增强tilesPerImage份
                 for i in range(1, tilesPerImage + 1):
-                    # print newname
-                    w, h = im.size
-                    if w < 224:
-                        im = cv2.resize(im, (224, h))
-                    w, h = im.size
-                    if h < 224:
-                        im = cv2.resize(im, (w, 224))
-                    w, h = im.size
-
-                    # print("Cropping",w,h)
+                    # 获得图片大小
+                    # 获取图片截取大小
                     if i < (tilesPerImage / 360) * 100 and w > 300:
                         dx = 224
                     if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
@@ -217,38 +225,42 @@ def temp_Process(subfolders, fold, mod):
                         dy = 320
                     if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
                         dy = 640
+
+                    # 随机获得图片区域图片
                     x = random.randint(0, w - dx - 1)
                     y = random.randint(0, h - dy - 1)
-                    #print("Cropping {}: {},{} -> {},{}".format(file, x,y, x+dx, y+dy))
-                    im_cropped = im.crop((x, y, x + dx + 5, y + dy + 5))
-                    if i % 2 == 0:  # roate 180,90
+
+                    # 将图片截取指定大小
+                    im_cropped = im.crop((x, y, x + dx + 1, y + dy + 1))
+
+                    if i % 2 == 0:  # 将图片旋转 90\180
                         im_cropped = im_cropped.transpose(
                             random.choice(rotateAction))
-                    if i % 2 == 0 and i > (tilesPerImage / 360) * 300:
+                    if i % 2 == 0 and i > (tilesPerImage / 360) * 300:  # 将图片旋转1-45角度
                         roate_drgree = random.choice(rotate45degree)
                         im_cropped = im_crotate_image_square(
                             im_cropped, roate_drgree)
-                    if w != 0 and h != 0:
-                        # im_cropped.save(newname)
-                        im_cropped = cv2.resize(
-                            np.array(im_cropped), (224, 224))
-                        if is_feature_now == False:
-                            temp_list.append(
-                                [im_cropped, subfolder, imgfile])
-                        else:
-                            temp_list.append(
-                                [getFeatures(im_cropped, mod), subfolder, imgfile])
-                # don't remove startImg
-                # os.remove(imgfile)
-            except Exception:
-                logging.error('Bad Image: %s' % imgfile)
+
+                    # 将处理后的图片转为224、224
+                    im_cropped = cv2.resize(
+                        np.array(im_cropped), (224, 224))
+
+                    # 将处理后的图片按照，图片特征， 色卡id，图片地址进行存入数组
+                    if is_feature_now:
+                        temp_list.append(
+                        [getFeatures(im_cropped, mod), subfolder, imgfile])
+                    else:
+                        temp_list.append(
+                        [im_cropped, subfolder, imgfile])
+            except Exception, msg:
+                logging.error('Bad Image: %s B %s ' % (imgfile, msg))
                 continue
-        logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(fold, subfolder, 'knn_splite.npy'), (time.time() - temp_time)))
-        np.save(os.path.join(fold, subfolder, 'knn_splite.npy'), temp_list)
+        logging.info('Save %s SpeedTime: %0.2f %d' % (os.path.join(fold, subfolder, fileName), (time.time() - temp_time), len(temp_list)))
+        np.save(os.path.join(fold, subfolder, fileName), temp_list)
     return 'Good Ending %s    %s' % (fold, subfolders)
 
-def splits_resamples(facescrub_root, tilesPerImage=360, mod=None, pool=None):
-    #import sklearn
+def splits_resamples(facescrub_root, tilesPerImage=360, mod=None, pool=None, fileName='knn_splite.npy'):
+    # import sklearn
     t_time = time.time()
     # logging.info('Start ImageDir: %s ' % facescrub_root)
     fold = facescrub_root
@@ -276,13 +288,13 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None, pool=None):
         start = cut * i
         end = cut * (i + 1)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod, fileName)))
         logging.info('########Process %d Start' % i)
     if end != len(subfolders):
         start = end
         end = len(subfolders)
         logging.info(subfolders[start:end])
-        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod)))
+        result.append(pool.apply_async(temp_Process, (subfolders[start:end], fold, mod, fileName)))
         logging.info('########Process %d Start' % cpu_number)
     # pool.close()
     # pool.join()
@@ -290,6 +302,29 @@ def splits_resamples(facescrub_root, tilesPerImage=360, mod=None, pool=None):
     #     logging.info(i.get())
     logging.info('End ImageDir: %s Speed Time: %f' % (facescrub_root, (time.time() - t_time)))
     return fold
+
+# 将所有的图片进行增强，多进程
+def spliteAllOfPath(fileName='knn_splite.npy'):
+    if is_feature_now:
+        mod = init()
+    subfolders = [folder for folder in os.listdir(
+        path) if os.path.isdir(os.path.join(path, folder))]
+    pool = multiprocessing.Pool()
+    for imgDir in subfolders:
+        if is_feature_now:
+            splits_resamples(facescrub_root=os.path.join(path, imgDir),
+                             tilesPerImage=tilesPerImage,
+                             mod=mod,
+                             pool=pool,
+                             fileName=fileName)
+        else:
+            splits_resamples(facescrub_root=os.path.join(path, imgDir),
+                             tilesPerImage=tilesPerImage,
+                             pool=pool,
+                             fileName=fileName)
+    pool.close()
+    pool.join()
+
 
 def load_all_img(path, not_double=True):
     import time
@@ -392,6 +427,7 @@ def removeAllSpliteOfPath():
             print 'End ImageDir: %s Speed Time: %f' % (os.path.join(path2, file2), (time.time() - t_time))
 
 
+# 将图片数据库进行提取特征，并存放到test和train存放的目录中
 def loadFeature():
     test = np.load(os.path.join(path, knn_name + '_test.npy'))
     train = np.load(os.path.join(path, knn_name + '_train.npy'))
@@ -474,27 +510,6 @@ def resetRandom():
     np.save(os.path.join(path, test_name + '_train.npy'),
             tempList[int(num * test_ratio):])
 
-
-def spliteAllOfPath():
-    if is_feature_now:
-        mod = init()
-    subfolders = [folder for folder in os.listdir(
-        path) if os.path.isdir(os.path.join(path, folder))]
-    pool = multiprocessing.Pool()
-    for imgDir in subfolders:
-        if is_feature_now:
-            splits_resamples(facescrub_root=os.path.join(path, imgDir),
-                             tilesPerImage=tilesPerImage,
-                             mod=mod,
-                             pool=pool)
-        else:
-            splits_resamples(facescrub_root=os.path.join(path, imgDir),
-                             tilesPerImage=tilesPerImage,
-                             pool=pool)
-    pool.close()
-    pool.join()
-
-
 def runTest():
     m_bad = 0
     m_right = 0
@@ -560,41 +575,59 @@ if __name__ == '__main__':
     import getopt
     from collections import Counter
     import random
-
+    fName = 'knn_splite.npy'
     opts, args = getopt.getopt(sys.argv[1:], 'f:sltzr:ai:mk:gx:v:hbpj:', ['test=', 'train=', 'knn_name=', 'layer=',
-                                                                          'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path='])
+                                                                          'time=', 'dist=', 'report=', 'hash', 'size', 'log', 'round=', 'prefix=', 'caffe', 'caffe_path=', 'fName='])
     for op, value in opts:
+        # 设置根目录路径
         if op == '-f':
             path = value
+        # 是否在图像增强时进行特征提取（将大大减少空间占有率）
         elif op == '-p':
             is_feature_now = True
+        # 是否重置测试数据（现在使用hash寻找，此工具不赞成进行测试）
         elif op == '-h':
             resetTest = True
+        # 设置测试时的文件名（废弃）
         elif op == '-v':
             test_name = value
+        # 执行提取特征
         elif op == '-g':
             loadFeature()
+        # 是否开启日志功能
         elif op == '--log':
             is_log = True
+        # 是否是使用caffe，该参数只在数据增强里使用，但是现在已经废弃了，不再支持（另见从caffe model转为mxnet model）。
         elif op == '--caffe':
             is_caffe = True
+        # 执行几次循环测试操作
         elif op == '--round':
             num_round = int(value)
+        # 设置数据增强后保存的文件名
+        elif op == '--fName':
+            fName = value
+        # 设置cpu数量（该参数无效）
         elif op == '-j':
             cpu_number = int(value)
+        # 设置需要使用的神经网络
         elif op == '--prefix':
             prefix = value
+        # 设置使用神经网络的layer层
         elif op == '--layer':
             layer = value
+        # 设置特征提取后的文件夹名字
         elif op == '--knn_name':
             knn_name = value
+        # 设置测试时的文件名（测试用例）
         elif op == '--test':
             test_file_name = value
+        # 设置测试时的文件名（训练集）
         elif op == '--train':
             train_file_name = value
         elif op == '--caffe_path':
             caffe_path = value
             sys.path.insert(0, caffe_path)
+        # 测试时是否测试大类
         elif op == '-b':
             is_big_key = True
             subfolders = [folder for folder in os.listdir(
@@ -629,7 +662,7 @@ if __name__ == '__main__':
         elif op == '--report':
             reportTime = int(value)
         elif op == '-a':
-            spliteAllOfPath()
+            spliteAllOfPath(fName)
         elif op == '-r':
             test_ratio = float(value)
         elif op == '-s':

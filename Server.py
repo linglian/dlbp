@@ -53,6 +53,7 @@ def spliteAllOfPath(mod=None):
     subfolders = [folder for folder in os.listdir(
         path) if os.path.isdir(os.path.join(path, folder))]
     # 循环扫描大类文件夹
+    tilesPerImage = splite_num
     for imgDir in subfolders:
         splits_resamples(facescrub_root=os.path.join(path, imgDir),
                             tilesPerImage=tilesPerImage,
@@ -88,27 +89,27 @@ def temp_Process(subfolders, fold, mod):
         temp_list = []
 
         ''' 旧策略
-        # 检测该文件夹色卡文件夹是否存在knn_name， 有则不训练该文件夹数据
-        if not_double and os.path.exists(os.path.join(fold, subfolder, knn_name)):
+        # 检测该文件夹色卡文件夹是否存在npy_name， 有则不训练该文件夹数据
+        if not_double and os.path.exists(os.path.join(fold, subfolder, npy_name)):
             logging.info('Has %s' % os.path.join(
-                fold, subfolder, knn_name))
+                fold, subfolder, npy_name))
             continue
         '''
 
         #''' 新策略
-        # 检测该文件夹色卡文件夹是否存在knn_name， 有则不训练该文件夹数据
-        if os.path.exists(os.path.join(fold, subfolder, knn_name)):
+        # 检测该文件夹色卡文件夹是否存在npy_name， 有则不训练该文件夹数据
+        if os.path.exists(os.path.join(fold, subfolder, npy_name)):
             try:
-                if len(np.load(os.path.join(fold, subfolder, knn_name))) / tilesPerImage == len(imgsfiles):
+                if len(np.load(os.path.join(fold, subfolder, npy_name))) / tilesPerImage == len(imgsfiles):
                     continue
                 else:
                     logging.info('Has new images insert, Then remove file' +
-                                 os.path.join(fold, subfolder, knn_name))
-                    removeFile(os.path.join(fold, subfolder, knn_name))
+                                 os.path.join(fold, subfolder, npy_name))
+                    removeFile(os.path.join(fold, subfolder, npy_name))
             except Exception:
-                logging.error('knn_name: %s' %
-                              os.path.join(fold, subfolder, knn_name))
-                removeFile(os.path.join(fold, subfolder, knn_name))
+                logging.error('npy_name: %s' %
+                              os.path.join(fold, subfolder, npy_name))
+                removeFile(os.path.join(fold, subfolder, npy_name))
         #'''
         temp_time = time.time()
 
@@ -174,14 +175,16 @@ def temp_Process(subfolders, fold, mod):
             except Exception:
                 logging.error('Bad Image: %s' % imgfile)
                 continue
+            #break;
         logging.info('Save %s SpeedTime: %0.2f' % (os.path.join(
-            fold, subfolder, knn_name), (time.time() - temp_time)))
+            fold, subfolder, npy_name), (time.time() - temp_time)))
 
-        # 将处理后得到的特征数组存到色卡文件夹下的knn_name
-        np.save(os.path.join(fold, subfolder, knn_name), temp_list)
+        #break;
+        # 将处理后得到的特征数组存到色卡文件夹下的npy_name
+        np.save(os.path.join(fold, subfolder, npy_name), temp_list)
     return 'Good Ending %s    %s' % (fold, subfolders)
 
-# 将所有的knn_name读取到内存
+# 将所有的npy_name读取到内存
 
 
 def load_all_beOne(path):
@@ -219,20 +222,20 @@ def load_all_beOne(path):
                 # 获得色卡文件夹完整路径
                 filepath2 = os.path.join(filepath, file2)
 
-                # 判断是否存在knn_name文件
-                if os.path.exists(os.path.join(filepath2, knn_name)):
+                # 判断是否存在npy_name文件
+                if os.path.exists(os.path.join(filepath2, npy_name)):
                     imgArray = np.load(os.path.join(
-                        filepath2, knn_name))
+                        filepath2, npy_name))
                 else:
                     continue
 
                 # 记录数组占用大小
                 num += sys.getsizeof(imgArray)
 
-                # 如果读取到的imgArray数组为0，则knn_name所在文件夹损坏
+                # 如果读取到的imgArray数组为0，则npy_name所在文件夹损坏
                 if len(imgArray) == 0:
                     logging.error('Bad Npy: %s' %
-                                os.path.join(filepath2, knn_name))
+                                os.path.join(filepath2, npy_name))
                     continue
 
                 t_time = time.time()
@@ -240,23 +243,25 @@ def load_all_beOne(path):
                 j = 0  # 记录当前循环得到了几个数组
                 n = 0  # 记录已经获取了几个图片
                 # 遍历所有数组
-                for i in imgArray:
-                    if j == 0:
-                        # 将获取的数组打乱顺序
-                        random.shuffle(
-                            imgArray[splite_num * n: splite_num * (n + 1)])
-                    if j <= max_img:
-                        main_imgArray.append(i.copy())
-                    j += 1
-                    if j >= splite_num:
-                        n += 1
-                        j = 0
+                for i in range(0, len(imgArray) / splite_num):
+                    # 将获取的数组打乱顺序
+                    tempList = imgArray[splite_num * i: splite_num * (i + 1)]
+                    random.shuffle(tempList)
+                    j = 0
+                    for img in tempList:
+                        if j <= max_img:
+                            #print('Load %d ' % len(img[0]))
+                            main_imgArray.append(img.copy())
+                        j += 1
+                        if j >= splite_num:
+                            break
+                    # 将多余的数组删除
+                    del tempList
                 # 将多余的数组删除
                 del imgArray
-
                 # 刷新，无用指针清理
                 gc.collect()
-    #            break
+                #break
             except EOFError:
                 logging.error('Bad Folder ' + file + '_' + file2)
         logging.info('End Merge Npy: %d %f s' %
@@ -345,7 +350,7 @@ def init_mxnet(GPUid = 0):
     return feature_extractor
 
 # 初始化，不包括重载模型
-def initWidthoutMod():
+def initWithoutMod():
     q, train=init_hash()
     return (q, train)
 
@@ -469,17 +474,17 @@ def run_server(address, authkey, mod, q, train):
             msg= make_work(client, mod, q, train)
             if msg == 'Close': # 关闭监听
                 serv.close()
-                break
+                return "Close"
             else:
                 client.send(msg)
             if msg == 'train': # 开始训练，训练期间将关闭监听
                 serv.close()
                 spliteAllOfPath(mod);
                 q, train= initWithoutMod()
-                serv = Listener(address, authkey =authkey)
+                return "train"
         except Exception:
-            serv.close()
             traceback.print_exc()
+    serv.close()
 
 
 if __name__ == '__main__':
@@ -489,7 +494,7 @@ if __name__ == '__main__':
         if op == '-f': # 设置大类所在文件夹路径
             path= value
         if op == '-k': # 设置npy_name的文件名
-            knn_name= value
+            npy_name= value
         if op == '-p': # 设置运行时的id，同于通信
             my_id= int(value)
         if op == '-m': # 设置最大图片数量
@@ -501,5 +506,6 @@ if __name__ == '__main__':
     mod, q, train= init()
     logging.info('End Init')
     logging.info('Start Run')
-    run_server('./server%d.temp' % my_id, b'lee123456', mod, q, train)
+    while run_server('./server%d.temp' % my_id, b'lee123456', mod, q, train) == "train":
+        logging.info('Reset Server')
     logging.info('Stop Run')

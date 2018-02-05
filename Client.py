@@ -273,7 +273,7 @@ if __name__ == '__main__':
     is_m = False
     try:
         arg = sys.argv[1:]
-        opts, args = getopt.getopt(sys.argv[1:], 'f:zt:k:sm:p:l:o:')
+        opts, args = getopt.getopt(sys.argv[1:], 'f:zt:k:sm:p:l:o:', ['help', 'train'])
         for op, value in opts:
             if op == '-f':
                 img = value
