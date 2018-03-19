@@ -1,3 +1,4 @@
+#coding=utf-8
 import sys
 sys.path.insert(0, '/home/lol/anaconda2/lib/python2.7/dist-packages')
 import falconn
@@ -72,6 +73,7 @@ def runTest():
         p = falconn.get_default_parameters(trainNum, dim)
         t = falconn.LSHIndex(p)
         dataset = [np.ravel(x[0]).astype(np.float32) for x in train]
+        print len(dataset)
         dataset = np.array(dataset)
         t.setup(dataset)
         if is_pool:

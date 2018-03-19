@@ -95,9 +95,7 @@ def getDistOfCos(f, t):
 
 
 def getMinOfNum(a, K):
-    a = np.array(a)
     return sorted(a, key=lambda a: a[0])[0:K]
-
 
 def removeAllSplits(path):
     imgList = [img for img in os.listdir(
@@ -429,6 +427,7 @@ def removeAllSpliteOfPath():
 
 # 将图片数据库进行提取特征，并存放到test和train存放的目录中
 def loadFeature():
+    
     test = np.load(os.path.join(path, knn_name + '_test.npy'))
     train = np.load(os.path.join(path, knn_name + '_train.npy'))
     testNum = len(test)
@@ -492,16 +491,18 @@ def loadHash():
 
 
 def resetRandom():
+    import random
+    '''
     test = np.load(os.path.join(path, test_name + '_test.npy'))
     train = np.load(os.path.join(path, test_name + '_train.npy'))
     testNum = len(test)
     trainNum = len(train)
-    num = testNum + trainNum
+    '''
+    nums = np.load(os.path.join(path, test_name + '.npy'))
+    num = len(nums)
     tempList = []
     # print 'Start Random: %d + %d = %d' % (testNum, trainNum, num)
-    for i in test:
-        tempList.append(i)
-    for i in train:
+    for i in nums:
         tempList.append(i)
     random.shuffle(tempList)
     # print 'End Random: %d + %d = %d' % (testNum, trainNum, num)
@@ -517,12 +518,13 @@ def runTest():
     for main_times in range(0, times):
         if resetTest:
             resetRandom()
+        logging.info('Start Load')
         test = np.load(os.path.join(path, test_file_name))
         train = np.load(os.path.join(path, train_file_name))
         testNum = len(test)
         trainNum = len(train)
         m_t = time.time()
-        # logging.info('Start test: %d  train: %d' % (testNum, trainNum))
+        logging.info('Start test: %d  train: %d' % (testNum, trainNum))
         for i in test:
             t1 = time.time()
             minD = []
