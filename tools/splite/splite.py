@@ -69,7 +69,7 @@ def splite_img(imgfile):
     try:
         temp_list = []
         # 打开图片
-        im = Image.open(imgfile, "WEBP")
+        im = Image.open(imgfile)
         # 获得原始图片大小
         w, h = im.size
         # 变换形状224， 224
