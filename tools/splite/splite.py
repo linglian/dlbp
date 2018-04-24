@@ -124,7 +124,6 @@ def splite_img(imgfile):
             # temp_list.append(im_cropped)
             # 将处理后的图片存起来
             newname = newname.replace(mainFold, toFold)
-            print('Save %s' % newname)
             t_im = Image.fromarray(im_cropped)
             t_im.save(newname[0: newname.find('.')] + '.jpg', "JPEG")
     except Exception as msg:
