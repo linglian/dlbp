@@ -75,7 +75,9 @@ def splite_img(imgfile):
         # 变换形状224， 224
         temp_im = cv2.resize(np.array(im), (224, 224))
         # 增加原始图片
-        temp_list.append(temp_im)
+        temp_imgfile = imgfile.replace(mainFold, toFold);
+
+        temp_im.save(temp_imgfile)
         # 删除图片上下尺子的影响
         im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
 
@@ -120,14 +122,15 @@ def splite_img(imgfile):
             # 将处理后的图片按照，图片特征， 色卡id，图片地址进行存入数组
             # temp_list.append(im_cropped)
             # 将处理后的图片存起来
-            newname = newname.replace(mainFold, mainFold + '/examples');
-        return temp_list
+            newname = newname.replace(mainFold, toFold)
+            im_cropped.save(newname)
     except Exception as msg:
         logging.error('Bad Image: %s B %s ' % (imgfile, msg))
         return None
  
 def start_splite(path, filePath, toPath):
     logging.info('Create Fold %s ' % os.path.join(toPath, filePath));
+    print('Create Fold %s ' % os.path.join(toPath, filePath));
     
     check_fold(os.path.join(toPath, filePath));
     folders = [folder for folder in os.listdir(
@@ -137,8 +140,8 @@ def start_splite(path, filePath, toPath):
         os.path.join(path, filePath)) if folder.endswith('.webp')]
     
     for folder in folders2:
-        logging.info('Splite Image %s ' % os.path.join(toPath, filePath, folder));
-        # splite_img(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
+        print('Splite Image %s ' % os.path.join(toPath, filePath, folder));
+        splite_img(os.path.join(path, filePath, folder))
 
     for folder in folders:
         start_splite(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
