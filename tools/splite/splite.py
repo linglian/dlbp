@@ -141,7 +141,7 @@ def start_splite(path, filePath, toPath):
         # splite_img(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
 
     for folder in folders:
-        startSplite(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
+        start_slite(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
 
 
 if __name__ == "__main__":
