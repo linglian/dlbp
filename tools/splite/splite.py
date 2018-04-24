@@ -126,7 +126,7 @@ def splite_img(imgfile):
         logging.error('Bad Image: %s B %s ' % (imgfile, msg))
         return None
  
-def startSplite(path, filePath, toPath):
+def start_splite(path, filePath, toPath):
     logging.info('Create Fold %s ' % os.path.join(toPath, filePath));
     
     check_fold(os.path.join(toPath, filePath));
