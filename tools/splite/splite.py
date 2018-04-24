@@ -123,6 +123,7 @@ def splite_img(imgfile):
             # temp_list.append(im_cropped)
             # 将处理后的图片存起来
             newname = newname.replace(mainFold, toFold)
+            print('Save %s' % newname)
             im_cropped.save(newname)
     except Exception as msg:
         logging.error('Bad Image: %s B %s ' % (imgfile, msg))
