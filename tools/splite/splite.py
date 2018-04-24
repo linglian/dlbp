@@ -22,11 +22,11 @@ rotate45degree = [45, 135, 270]
 thresholdGLOABL = 0.42
 
 mainFold = '/data/图片/'
-toFold = '/data/图片2/'
+toFold = '/data/train_image/'
 """创建文件夹（如果文件夹不存在的话）
 """
 
-def checkFold(name):
+def check_fold(name):
     if not os.path.exists(name):
         os.mkdir(name)
 
@@ -129,7 +129,7 @@ def splite_img(imgfile):
 def startSplite(path, filePath, toPath):
     logging.info('Create Fold %s ' % os.path.join(toPath, filePath));
     
-    checkFold(os.path.join(toPath, filePath));
+    check_fold(os.path.join(toPath, filePath));
     folders = [folder for folder in os.listdir(
         os.path.join(path, filePath)) if os.path.isdir(os.path.join(path, filePath, folder))]
 
@@ -142,3 +142,14 @@ def startSplite(path, filePath, toPath):
 
     for folder in folders:
         startSplite(os.path.join(path, filePath), folder, os.path.join(toPath, filePath))
+
+
+if __name__ == "__main__":
+    opts, args = getopt.getopt(sys.argv[1:], 'f:s:')
+    for op, value in opts:
+        # 设置根目录路径
+        if op == '-f':
+            mainFold = value
+        elif op == '-s':
+            toFold = value
+    start_splite(mainFold, '', toFold);
