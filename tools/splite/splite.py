@@ -69,7 +69,7 @@ def splite_img(imgfile):
     try:
         temp_list = []
         # 打开图片
-        im = Image.open(imgfile)
+        im = Image.open(imgfile, "WEBP")
         # 获得原始图片大小
         w, h = im.size
         # 变换形状224， 224
@@ -127,6 +127,7 @@ def splite_img(imgfile):
             im_cropped.save(newname)
     except Exception as msg:
         logging.error('Bad Image: %s B %s ' % (imgfile, msg))
+        print('Bad Image: %s B %s ' % (imgfile, msg))
         return None
  
 def start_splite(path, filePath, toPath):
