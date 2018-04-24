@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w')
       
 # 数据增强区
-tilesPerImage = 16
+tilesPerImage = 180
 rotateAction = [Image.FLIP_LEFT_RIGHT, Image.FLIP_TOP_BOTTOM,
                 Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270]
 rotate45degree = [45, 135, 270]
