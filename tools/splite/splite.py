@@ -77,7 +77,8 @@ def splite_img(imgfile):
         # 增加原始图片
         temp_imgfile = imgfile.replace(mainFold, toFold);
 
-        temp_im.save(temp_imgfile)
+        t_im = Image.fromarray(temp_im)
+        t_im.save(temp_imgfile[0: temp_imgfile.find('.')] + '.jpg', "JPEG")
         # 删除图片上下尺子的影响
         im = im.crop((0, int(h * 0.1), w, int(h * 0.9)))
 
