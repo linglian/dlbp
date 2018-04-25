@@ -67,6 +67,9 @@ def im_crotate_image_square(im, deg):
 def splite_img(imgfile):
     import random
     try:
+        exit_file = imgfile[0: imgfile.find('.')] + '.jpg'
+        if os.path.exists(exit_file) is True:
+            return
         temp_list = []
         # 打开图片
         im = Image.open(imgfile)
@@ -141,9 +144,12 @@ def start_splite(path, filePath, toPath):
 
     folders2 = [folder for folder in os.listdir(
         os.path.join(path, filePath)) if folder.endswith('.webp')]
-    
+
+    tempFolders = [folder for folder in os.listdir(
+        os.path.join(toPath, filePath)) if folder.endswith('.jpg')]
+
     for folder in folders2:
-        print('Splite Image %s ' % os.path.join(toPath, filePath, folder));
+        # print('Splite Image %s ' % os.path.join(toPath, filePath, folder));
         splite_img(os.path.join(path, filePath, folder))
 
     for folder in folders:
