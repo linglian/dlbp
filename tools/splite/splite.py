@@ -68,7 +68,9 @@ def splite_img(imgfile):
     import random
     try:
         exit_file = imgfile[0: imgfile.find('.')] + '.jpg'
+        print('Check %s ' % exit_file)
         if os.path.exists(exit_file) is True:
+            print('Has %s ' % exit_file)
             return
         temp_list = []
         # 打开图片
