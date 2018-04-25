@@ -137,7 +137,7 @@ def splite_img(imgfile):
  
 def start_splite(path, filePath, toPath):
     logging.info('Create Fold %s ' % os.path.join(toPath, filePath));
-    # print('Create Fold %s ' % os.path.join(toPath, filePath));
+    print('Create Fold %s ' % os.path.join(toPath, filePath));
     
     check_fold(os.path.join(toPath, filePath));
     folders = [folder for folder in os.listdir(
