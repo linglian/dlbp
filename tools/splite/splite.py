@@ -67,6 +67,7 @@ def im_crotate_image_square(im, deg):
 def splite_img(imgfile):
     import random
     try:
+        exit_file = imgfile.replace(mainFold, toFold)
         exit_file = imgfile[0: imgfile.find('.')] + '.jpg'
         print('Check %s ' % exit_file)
         if os.path.exists(exit_file) is True:
