@@ -94,16 +94,24 @@ def splite_img(imgfile):
             # 获取图片截取大小
             if i < (tilesPerImage / 360) * 100 and w > 300:
                 dx = 224
-            if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 500:
+            if i < (tilesPerImage / 360) * 100 and w > 500:
                 dx = 320
-            if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 800:
+            if i < (tilesPerImage / 360) * 100 and w > 800:
                 dx = 640
+            if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and w > 1400:
+                dx = 1280
+            if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and w > 3200:
+                dx = 2560
             if i < (tilesPerImage / 360) * 100 and h > 300:
                 dy = 224
-            if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 500:
+            if i < (tilesPerImage / 360) * 100 and h > 500:
                 dy = 320
-            if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 800:
+            if i < (tilesPerImage / 360) * 100 and h > 800:
                 dy = 640
+            if (tilesPerImage / 360) * 100 < i < (tilesPerImage / 360) * 200 and h > 1400:
+                dy = 1280
+            if (tilesPerImage / 360) * 200 < i < (tilesPerImage / 360) * 300 and h > 3200:
+                dy = 2560
 
             # 随机获得图片区域图片
             x = random.randint(0, w - dx - 1)
