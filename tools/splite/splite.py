@@ -69,9 +69,7 @@ def splite_img(imgfile):
     try:
         exit_file = imgfile.replace(mainFold, toFold)
         exit_file = exit_file[0: exit_file.find('.')] + '.jpg'
-        print('Check %s ' % exit_file)
         if os.path.exists(exit_file) is True:
-            print('Has %s ' % exit_file)
             return
         temp_list = []
         # 打开图片
